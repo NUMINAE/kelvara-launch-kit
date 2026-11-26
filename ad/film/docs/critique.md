@@ -24,3 +24,6 @@ Final: hook 8 · readability 8 · motion 8 · variety 8 · brand 9 · sync 9
 
 ## Round 4: retime to 15 s
 Feedback: the 10 s cut was too fast to follow. Kept every scene and stretched them over 30 beats (WARP in film.js); the score was rebuilt for 30 beats. Each Mini App receipt now holds about 1 s. Sync median 3.8 ms, 24/26 hits within 20 ms (same two expected misses).
+
+## Round 5: slow the motion itself
+Feedback: the 15 s cut still felt fast because each animation kept its old speed. Softer springs (text settles in ~0.9 s, was 0.29 s), glyph stagger doubled, whips 0.9 beats (were 0.4), tag typing 0.8 beats, slower crossfades, exits and end-card drawing. Phone rise starts under the amber wipe so beat 12 isn't empty.

@@ -6,7 +6,9 @@ import * as G from './lib/gl.js';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { rise, shot, grain } from './lib/kit.js';
 const { THREE } = G;
-const { W, H, FORMAT, E, prog, clamp, lerp, springU, springKeys, SPRING, font, layout, text, rrect, mulberry32 } = M;
+const { W, H, FORMAT, E, prog, clamp, lerp, springU, springKeys, font, layout, text, rrect, mulberry32 } = M;
+// Calmer than the shared presets: every entrance takes about twice as long to settle.
+const SPRING = { snappy: { stiffness: 60, damping: 14 }, bouncy: { stiffness: 60, damping: 9 }, gentle: { stiffness: 30, damping: 11 }, wobbly: { stiffness: 45, damping: 5 } };
 const P = FORMAT.portrait;
 const C = { bg: '#0b0c0e', bg2: '#111215', ink: '#f2efe8', mut: '#9a9ca1', acc: '#ffb224', accInk: '#141005', line: 'rgba(255,255,255,0.12)' };
 
@@ -113,7 +115,7 @@ function latticeSet() {
       const d = 9 * (7.2 / 9) ** prog(u, 0, 3);
       const from = new THREE.Vector3(P ? 0 : 0.4, 0, d);
       const hub = this.hub(t).clone();
-      const k = E.inExpo(prog(u, 3.0, 4.0));
+      const k = E.inOutCubic(prog(u, 2.7, 4.0));
       const to = hub.clone().add(new THREE.Vector3(0, 0, 0.18));
       cam.position.lerpVectors(from, to, k);
       const look = new THREE.Vector3(P ? 0 : 0.4, 0, 0).lerp(hub, E.inOutCubic(prog(u, 2.6, 3.6)));
@@ -127,9 +129,9 @@ function headline(ctx, u) {
   const x = s.x, y0 = P ? s.y + size * 0.9 : H * 0.5 - size * 0.55;
   const words = [['Machines', 0, C.ink], ['pay', 1, C.ink], ['machines.', 2, C.acc]];
   words.forEach(([w, b, col], i) => {
-    rise(ctx, w, x, y0 + i * size * 0.98, u, b - (i === 0 ? 0.3 : 0.1), { size, weight: 800, color: col, track: -0.035, cfg: SPRING.snappy, stagger: 0.022, out: 3.25 + i * 0.06, outLen: 0.4 });
+    rise(ctx, w, x, y0 + i * size * 0.98, u, b - (i === 0 ? 0.3 : 0.1), { size, weight: 800, color: col, track: -0.035, cfg: SPRING.snappy, stagger: 0.045, out: 3.0 + i * 0.1, outLen: 0.75 });
   });
-  const a = E.outCubic(prog(u, 2.4, 2.9)) * (1 - prog(u, 3.2, 3.5));
+  const a = E.outCubic(prog(u, 2.2, 3.0)) * (1 - prog(u, 3.1, 3.6));
   if (a > 0) {
     ctx.globalAlpha = a;
     text(ctx, 'THE SETTLEMENT NETWORK FOR AUTONOMOUS DEVICES', x, y0 + size * 2.98 + 56, font(P ? 25 : 24, 500, 'UI'), C.mut, 'left', 2);
@@ -141,7 +143,7 @@ function sceneLattice(ctx, u, t) {
   bg(ctx, P ? 0.5 : 0.75, P ? 0.66 : 0.45, 0.07 + 0.05 * prog(u, 2.5, 4));
   G.renderSet(ctx, LAT, t, u);
   // the dive: the hub's glow opens into the next shot
-  const k = E.inExpo(prog(u, 3.35, 4.0));
+  const k = E.inCubic(prog(u, 3.1, 4.0));
   if (k > 0) {
     const p = LAT.hub(t).clone().project(LAT.camera);
     const x = (p.x * 0.5 + 0.5) * W, y = (-p.y * 0.5 + 0.5) * H, r = 40 + k * Math.hypot(W, H) * 0.75;
@@ -163,7 +165,7 @@ function still(ctx, name, u, u0, u1, dx = 0) {
   ctx.save(); ctx.translate(dx, 0);
   if (name === 'drone') {
     // match cut: opens tight on the glowing pad (where the hub landed) and settles out
-    const k = springU(u, 4, SPRING.gentle);
+    const k = springU(u, 3.9, SPRING.gentle);
     M.cover(ctx, IMG.drone, 0, 0, W, H, { fx: o.fx, fy: lerp(0.78, o.fy, k), zoom: lerp(1.9, 1.1, k) * (1 + 0.04 * prog(u, 4, 5.6)) });
   } else {
     shot(ctx, IMG[name], 0, 0, W, H, u, u0, u1, { z0: 1.06, z1: 1.16, fx: o.fx, fy: o.fy, dx: 0.02 });
@@ -175,9 +177,9 @@ function still(ctx, name, u, u0, u1, dx = 0) {
 function tag(ctx, name, u, u0, u1) {
   const [a, b, amt, ms] = SHOTS[name].tag;
   const str = `${a}  →  ${b}   ·   ${amt}   ·   ${ms}`;
-  const n = Math.floor(clamp(prog(u, u0, u0 + 0.45)) * str.length);
+  const n = Math.floor(clamp(prog(u, u0, u0 + 0.8)) * str.length);
   if (n <= 0) return;
-  const out = E.inCubic(prog(u, u1 - 0.15, u1));
+  const out = E.inOutCubic(prog(u, u1 - 0.35, u1));
   const sz = FORMAT.pick({ '16x9': 30, '9x16': 30 });
   const f = font(sz, 500, 'UI');
   ctx.font = f;
@@ -191,7 +193,7 @@ function tag(ctx, name, u, u0, u1) {
   ctx.fillStyle = C.acc; ctx.beginPath(); ctx.arc(x + padX + 6, y + h / 2, 7, 0, 7); ctx.fill();
   text(ctx, str.slice(0, n), x + padX + 30, y + h / 2 + sz * 0.36, f, C.ink);
   // the payment itself: a dot runs the pill once the text is typed
-  const r = prog(u, u0 + 0.45, u0 + 1.15);
+  const r = prog(u, u0 + 0.8, u0 + 1.7);
   if (r > 0 && r < 1) {
     const px = x + 20 + (w - 40) * E.inOutCubic(r);
     const g = ctx.createRadialGradient(px, y + h, 0, px, y + h, 26);
@@ -202,17 +204,17 @@ function tag(ctx, name, u, u0, u1) {
 }
 function sceneMachines(ctx, u) {
   // drone b4-5.5, whip, charger b5.5-7, whip, robot b7-8 (a whip keeps both shots on screen)
-  const w1 = E.inOutCubic(prog(u, 5.3, 5.7)), w2 = E.inOutCubic(prog(u, 6.8, 7.2));
-  if (u < 5.7) still(ctx, 'drone', u, 4, 5.7, -w1 * W);
-  if (u > 5.3 && u < 7.2) still(ctx, 'charger', u, 5.3, 7.2, (1 - w1) * W - w2 * W);
-  if (u > 6.8) still(ctx, 'robot', u, 6.8, 8.2, (1 - w2) * W);
-  if (u < 5.45) tag(ctx, 'drone', u, 4.45, 5.4);
-  if (u > 5.6 && u < 6.95) tag(ctx, 'charger', u, 5.95, 6.9);
-  if (u > 7.1) tag(ctx, 'robot', u, 7.4, 7.95);
+  const w1 = E.inOutCubic(prog(u, 5.05, 5.95)), w2 = E.inOutCubic(prog(u, 6.55, 7.45));
+  if (u < 5.95) still(ctx, 'drone', u, 4, 5.95, -w1 * W);
+  if (u > 5.05 && u < 7.45) still(ctx, 'charger', u, 5.05, 7.45, (1 - w1) * W - w2 * W);
+  if (u > 6.55) still(ctx, 'robot', u, 6.55, 8.2, (1 - w2) * W);
+  if (u < 5.1) tag(ctx, 'drone', u, 4.2, 5.05);
+  if (u > 5.8 && u < 6.6) tag(ctx, 'charger', u, 5.8, 6.55);
+  if (u > 7.3) tag(ctx, 'robot', u, 7.3, 8.0);
   // b7.8-8: the robot's amber band stretches into a line that wipes to the phone
-  const k = E.inOutCubic(prog(u, 7.75, 8.0));
+  const k = E.inOutCubic(prog(u, 7.55, 8.0));
   if (k > 0) {
-    const y = H * (P ? 0.6 : 0.6), th = lerp(6, H * 1.4, E.inExpo(prog(u, 7.88, 8.0)));
+    const y = H * (P ? 0.6 : 0.6), th = lerp(6, H * 1.4, E.inCubic(prog(u, 7.78, 8.0)));
     ctx.fillStyle = C.acc; ctx.fillRect(W / 2 - (W / 2) * k, y - th / 2, W * k, th);
   }
 }
@@ -221,11 +223,11 @@ function sceneMachines(ctx, u) {
 function drawScreen(c, w, h, u) {
   let i = 0; APP_AT.forEach((b, k) => { if (u >= b) i = k; });
   c.drawImage(IMG['app_' + APP[i]], 0, 0, w, h);
-  const xf = prog(u, APP_AT[i + 1] - 0.12 ?? 99, APP_AT[i + 1] ?? 99);
-  if (i + 1 < APP.length && u > APP_AT[i + 1] - 0.12) { c.globalAlpha = xf; c.drawImage(IMG['app_' + APP[i + 1]], 0, 0, w, h); c.globalAlpha = 1; }
+  const xf = E.inOutCubic(prog(u, APP_AT[i + 1] - 0.2, APP_AT[i + 1]));
+  if (i + 1 < APP.length && u > APP_AT[i + 1] - 0.2) { c.globalAlpha = xf; c.drawImage(IMG['app_' + APP[i + 1]], 0, 0, w, h); c.globalAlpha = 1; }
   // touch: a fingertip arrives, presses, and leaves a ring
   TAPS.forEach(([b, x, y]) => {
-    const pre = prog(u, b - 0.3, b), post = prog(u, b, b + 0.6);
+    const pre = prog(u, b - 0.45, b), post = prog(u, b, b + 0.8);
     if (pre <= 0 || post >= 1) return;
     const cx = x * w, cy = y * h;
     if (post === 0) { c.fillStyle = `rgba(255,255,255,${0.32 * E.outCubic(pre)})`; c.beginPath(); c.arc(cx, cy, 44 - 8 * E.inCubic(prog(u, b - 0.08, b)), 0, 7); c.fill(); }
@@ -247,8 +249,8 @@ function phoneSet() {
   glass.position.z = 0.044; phone.add(glass);
   return { scene, camera: cam, update(t, u) {
     cam.position.set(0, 0, P ? 5.3 : 4.3); cam.lookAt(0, 0, 0);
-    const k = springU(u, 7.6, SPRING.gentle);
-    const away = E.inCubic(prog(u, 13.6, 14.05));
+    const k = springU(u, 7.15, SPRING.gentle);
+    const away = E.inOutCubic(prog(u, 13.45, 14.05));
     const [px, py] = P ? [0, -0.36] : [0.62, -0.15];
     phone.position.set(px + away * (P ? 0 : 0.4), py + (1 - k) * -2.4 + 0.025 * Math.sin(t * 1.5) - away * 0.3, -away * 3.5);
     phone.rotation.set(-0.06 + (1 - k) * 0.55 + away * 0.5, lerp(-1.2, -0.22, k) + 0.035 * Math.sin(t * 1.1) - away * 0.6, 0.025);
@@ -268,12 +270,12 @@ function sceneApp(ctx, u, t) {
   const x = P ? W / 2 : s.x, y = P ? s.y + size * 0.85 : H * 0.42;
   const al = P ? 'center' : 'left';
   if (u < 14.2) {
-    const a = E.outCubic(prog(u, 8.3, 8.8)) * (1 - prog(u, 13.8, 14.1));
+    const a = E.outCubic(prog(u, 8.2, 9.0)) * (1 - prog(u, 13.4, 13.9));
     ctx.globalAlpha = a;
     text(ctx, 'IN TELEGRAM  ·  ON TON', x, y - size - 30, font(P ? 32 : 30, 500, 'UI'), C.acc, al, 2);
     ctx.globalAlpha = 1;
-    rise(ctx, 'Pay in USDT.', x, y, u, 9, { size, weight: 800, color: C.ink, align: al, track: -0.03, out: 13.75, outLen: 0.35 });
-    rise(ctx, 'Claim KVRA.', x, y + size * 1.02, u, 12, { size, weight: 800, color: C.acc, align: al, track: -0.03, out: 13.8, outLen: 0.35 });
+    rise(ctx, 'Pay in USDT.', x, y, u, 8.75, { size, weight: 800, color: C.ink, align: al, track: -0.03, stagger: 0.04, out: 13.4, outLen: 0.6, cfg: SPRING.snappy });
+    rise(ctx, 'Claim KVRA.', x, y + size * 1.02, u, 11.75, { size, weight: 800, color: C.acc, align: al, track: -0.03, stagger: 0.04, out: 13.45, outLen: 0.6, cfg: SPRING.snappy });
   }
 }
 
@@ -281,7 +283,7 @@ function sceneApp(ctx, u, t) {
 function tile(ctx, x, y, w, h, u, u0, k, v, sub, bar, vs) {
   const s = springU(u, u0, SPRING.snappy);
   if (s <= 0.001) return;
-  const col = E.inCubic(prog(u, 15.4, 15.8));
+  const col = E.inOutCubic(prog(u, 15.1, 15.8));
   ctx.save();
   const cx = x + w / 2, cy = y + h / 2;
   ctx.translate(lerp(cx, W / 2, col), lerp(cy, H * (P ? 0.4 : 0.42), col) + (1 - s) * 60);
@@ -326,7 +328,7 @@ function sceneFigures(ctx, u, t) {
     const w = (s.w - 3 * 24) / 4, h = 270, y = H * 0.5 - h / 2 + 40;
     tiles.forEach((tl, i) => tile(ctx, s.x + i * (w + 24), y, w, h, u, 13.75 + i * 0.25, ...tl));
   }
-  const a = E.outCubic(prog(u, 13.85, 14.2)) * (1 - prog(u, 15.5, 15.85));
+  const a = E.outCubic(prog(u, 13.85, 14.4)) * (1 - prog(u, 15.2, 15.7));
   ctx.globalAlpha = a;
   const hs = FORMAT.pick({ '16x9': 64, '9x16': 72 });
   text(ctx, 'Presale is live.', s.x, P ? H * 0.3 - 10 : H * 0.5 - 135 - 20, font(hs, 800, 'Display'), C.ink, 'left', -2);
@@ -336,7 +338,7 @@ function sceneFigures(ctx, u, t) {
 // ---------------------------------------------------------------- S5 end card
 function mark(ctx, cx, cy, sz, u) {
   const k = springU(u, 15.6, SPRING.bouncy);
-  const draw = E.outCubic(prog(u, 15.55, 16.0));
+  const draw = E.inOutCubic(prog(u, 15.4, 16.2));
   ctx.save(); ctx.translate(cx, cy); ctx.scale(sz / 28, sz / 28); ctx.translate(-14, -14);
   ctx.lineWidth = 2; ctx.lineCap = 'round'; ctx.strokeStyle = C.ink;
   // rounded square traced with a dash that grows
@@ -347,7 +349,7 @@ function mark(ctx, cx, cy, sz, u) {
     if (s <= 0) return;
     ctx.fillStyle = C.acc; ctx.beginPath(); ctx.arc(x, y, 3 * Math.max(0, s), 0, 7); ctx.fill();
   });
-  const l = E.outCubic(prog(u, 15.95, 16.25));
+  const l = E.inOutCubic(prog(u, 15.9, 16.5));
   if (l > 0) { ctx.strokeStyle = C.acc; ctx.beginPath(); ctx.moveTo(11, 17); ctx.lineTo(11 + 6 * l, 17 - 6 * l); ctx.stroke(); }
   // a payment runs the line, on every beat
   if (u > 16.8) {
@@ -366,7 +368,7 @@ function endCard(ctx, u, t) {
   mark(ctx, W / 2, cy, msz, u);
   const wy = cy + msz * 0.5 + FORMAT.pick({ '16x9': 150, '9x16': 190 });
   const ws = FORMAT.pick({ '16x9': 120, '9x16': 132 });
-  rise(ctx, 'KELVARA', W / 2, wy, u, 15.92, { size: ws, weight: 700, color: C.ink, align: 'center', track: 0.1, stagger: 0.03 });
+  rise(ctx, 'KELVARA', W / 2, wy, u, 15.85, { size: ws, weight: 700, color: C.ink, align: 'center', track: 0.1, stagger: 0.06, cfg: SPRING.snappy });
   // pill: Presale live · Open in Telegram
   const ps = springU(u, 17.5, SPRING.bouncy);
   if (ps > 0.001) {
@@ -382,7 +384,7 @@ function endCard(ctx, u, t) {
     text(ctx, label, 76, ph / 2 + 13, f, C.accInk, 'left');
     ctx.restore();
   }
-  const a = E.outCubic(prog(u, 17.75, 18.25));
+  const a = E.outCubic(prog(u, 17.6, 18.5));
   if (a > 0) {
     ctx.globalAlpha = a;
     const ly = wy + FORMAT.pick({ '16x9': 230, '9x16': 270 });
