@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kelvara · Machines pay machines (concept project by Numinae)</title>
+<meta name="description" content="Kelvara is a concept launch kit by Numinae: a settlement network where robots, vehicles and AI agents pay each other in USDT. Not a real token.">
+<meta name="theme-color" content="#0b0c0e">
+<meta property="og:title" content="Kelvara · Machines pay machines">
+<meta property="og:description" content="A concept crypto launch kit by Numinae: landing page, Telegram Mini App and launch ad.">
+<meta property="og:image" content="assets/og.png">
+<meta property="og:type" content="website">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="assets/fonts/archivo-latin-wdth-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/site.css">
+<script>document.documentElement.classList.add('js')</script>
+</head>
+<body>
+<div class="progress" aria-hidden="true"></div>
+
+<header class="nav" id="top">
+  <a class="brand" href="#top" aria-label="Kelvara home">
+    <svg viewBox="0 0 28 28" aria-hidden="true"><rect x="1" y="1" width="26" height="26" rx="8" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="9" cy="19" r="3" fill="currentColor"/><circle cx="19" cy="9" r="3" fill="currentColor"/><path d="M11 17l6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    <span class="brand-name">KELVARA</span>
+    <span class="brand-tag">Concept by Numinae</span>
+  </a>
+  <nav aria-label="Main">
+    <a href="#network">Network</a>
+    <a href="#how">How it works</a>
+    <a href="#token">Token</a>
+    <a href="#roadmap">Roadmap</a>
+    <a href="#join">Join</a>
+  </nav>
+  <a class="btn btn-nav" href="app/">Open Mini App</a>
+</header>
+
+<main>
+<section class="hero" id="hero">
+  <canvas id="gl" aria-hidden="true"></canvas>
+  <div class="hero-copy">
+    <h1><span>Machines</span> <span>pay</span> <span>machines.</span></h1>
+    <p class="eyebrow"><i class="live"></i><span>Presale live · token launch in <span data-cd-d>52</span> days · built on TON</span></p>
+    <p class="lede">Kelvara is the settlement network for autonomous devices. Robots, vehicles and AI agents pay each other in USDT, in under a second, with no human in the loop.</p>
+    <div class="cta">
+      <a class="btn primary" href="#join">Join the presale</a>
+      <a class="btn ghost" href="#how">See how it works</a>
+    </div>
+  </div>
+  <div class="tiles" aria-label="Launch figures (simulated)">
+    <div class="tile">
+      <span class="k">Raised</span>
+      <span class="v">$<span data-raised>18,412,640</span></span>
+      <span class="bar"><i data-raised-bar></i></span>
+      <span class="s"><span data-raised-pct>73.7</span>% of $25M cap</span>
+    </div>
+    <div class="tile">
+      <span class="k">Participants</span>
+      <span class="v" data-participants>48,217</span>
+      <span class="s">from 94 countries</span>
+    </div>
+    <div class="tile">
+      <span class="k">Settled, 24h</span>
+      <span class="v" data-settled>1,284,903</span>
+      <span class="s">testnet · median 412 ms</span>
+      <svg data-spark viewBox="0 0 100 28" preserveAspectRatio="none" aria-hidden="true"><polyline points=""/></svg>
+    </div>
+    <div class="tile">
+      <span class="k">Token launch</span>
+      <span class="v cd"><span data-cd-d>52</span>d <span data-cd-h>00</span>h <span data-cd-m>00</span>m<span class="cd-sec"> <span data-cd-s>00</span>s</span></span>
+      <span class="s">15 Jan 2027, 12:00 UTC</span>
+    </div>
+  </div>
+  <p class="hero-note">Concept project by Numinae · all figures simulated · testnet only</p>
+</section>
+
+<div class="feed" aria-hidden="true">
+  <div class="feed-track" data-feed></div>
+</div>
+
+<section class="sec" id="network">
+  <p class="label" data-reveal>01 / What it is</p>
+  <h2 data-reveal="clip">A payment rail for things that run themselves.</h2>
+  <p class="intro" data-reveal>A delivery drone pays a rooftop charger. A car pays a toll gate. An AI agent pays another agent for data. Kelvara settles each of these in USDT, in under a second, and nobody has to approve anything.</p>
+  <div class="bento">
+    <article class="card wide" data-reveal="scale" data-tilt>
+      <div class="viz bars" aria-hidden="true"></div>
+      <h3><span data-count="412">412</span> ms median settlement</h3>
+      <p>Payments clear between two devices before the charger has finished saying hello. Finality comes from relays that batch to TON every block.</p>
+    </article>
+    <article class="card" data-reveal="scale" style="--i:1" data-tilt>
+      <div class="viz stable" aria-hidden="true">
+        <svg viewBox="0 0 240 90" preserveAspectRatio="none"><polyline class="gas" points="0,60 20,30 40,66 60,22 80,58 100,40 120,74 140,28 160,52 180,18 200,62 220,36 240,50"/><line class="usdt" x1="0" y1="45" x2="240" y2="45"/></svg>
+      </div>
+      <h3>USDT in, USDT out</h3>
+      <p>Devices hold and spend a stable currency. No volatile gas token on the machine.</p>
+    </article>
+    <article class="card" data-reveal="scale" style="--i:2" data-tilt>
+      <div class="viz chip" aria-hidden="true">
+        <svg viewBox="0 0 120 120"><circle class="ring" cx="60" cy="60" r="52"/><rect x="36" y="36" width="48" height="48" rx="12"/><path d="M52 62l6 6 11-13"/></svg>
+      </div>
+      <h3>Keys live on the device</h3>
+      <p>Every machine signs with its own hardware key. The owner sets a spending limit and the chain enforces it.</p>
+    </article>
+    <article class="card wide" data-reveal="scale" style="--i:3" data-tilt>
+      <div class="viz fee" aria-hidden="true"><span>$0.000<b>4</b></span></div>
+      <h3>Fees too small to meter</h3>
+      <p>The average payment costs four hundredths of a cent, so a sensor can sell one reading at a time and still come out ahead.</p>
+    </article>
+  </div>
+</section>
+
+<section class="sec how" id="how">
+  <p class="label" data-reveal>02 / How it works</p>
+  <h2 data-reveal="clip">Open, pay, settle.</h2>
+  <div class="how-grid">
+    <div class="how-visual" data-step="1" aria-hidden="true">
+      <svg viewBox="0 0 560 400">
+        <path class="wire-bg" d="M150 170 C 230 96, 330 96, 410 170"/>
+        <path class="wire" id="wire" d="M150 170 C 230 96, 330 96, 410 170" pathLength="1"/>
+        <g class="dev"><rect x="54" y="122" width="96" height="96" rx="26"/><circle cx="102" cy="170" r="10"/><circle cx="82" cy="150" r="6"/><circle cx="122" cy="150" r="6"/><circle cx="82" cy="190" r="6"/><circle cx="122" cy="190" r="6"/><text x="102" y="246">DRONE-12</text></g>
+        <g class="dev"><rect x="410" y="122" width="96" height="96" rx="26"/><path class="bolt" d="M464 144l-18 30h14l-6 22 20-32h-14z"/><text x="458" y="246">CHARGER-04</text></g>
+        <g class="s1"><rect x="158" y="60" width="244" height="38" rx="19"/><text x="280" y="84">channel open · limit 25.00 USDT</text></g>
+        <g class="s2">
+          <circle r="5"><animateMotion dur="1.3s" repeatCount="indefinite" path="M150 170 C 230 96, 330 96, 410 170"/></circle>
+          <circle r="5"><animateMotion dur="1.3s" begin="0.33s" repeatCount="indefinite" path="M150 170 C 230 96, 330 96, 410 170"/></circle>
+          <circle r="5"><animateMotion dur="1.3s" begin="0.66s" repeatCount="indefinite" path="M150 170 C 230 96, 330 96, 410 170"/></circle>
+          <circle r="5"><animateMotion dur="1.3s" begin="0.99s" repeatCount="indefinite" path="M150 170 C 230 96, 330 96, 410 170"/></circle>
+          <rect x="196" y="60" width="168" height="38" rx="19"/><text x="280" y="84"><tspan data-stream>0.42</tspan> USDT streamed</text>
+        </g>
+        <g class="s3">
+          <rect class="blk b1" x="200" y="318" width="160" height="26" rx="10"/>
+          <rect class="blk b2" x="200" y="286" width="160" height="26" rx="10"/>
+          <rect class="blk b3" x="200" y="254" width="160" height="26" rx="10"/>
+          <text x="280" y="376">batch 48,211 · 1,204 payments · final in 412 ms</text>
+        </g>
+      </svg>
+      <p class="how-cap"><span class="c1">channel open · limit 25.00 USDT</span><span class="c2"><span data-stream>0.42</span> USDT streamed</span><span class="c3">batch 48,211 · 1,204 payments · final in 412 ms</span></p>
+    </div>
+    <ol class="steps">
+      <li data-how="1"><span class="n">1</span><h3>Open a channel</h3><p>The drone and the charger have never met. They open a payment channel with a spending limit the drone's owner set in advance. One on-chain message, a few hundred milliseconds.</p></li>
+      <li data-how="2"><span class="n">2</span><h3>Pay as you go</h3><p>While it charges, the drone streams USDT every second for the energy it has actually drawn. These payments are signed by the two devices and cost nothing to send.</p></li>
+      <li data-how="3"><span class="n">3</span><h3>Settle in batches</h3><p>Relays roll thousands of channel updates into one batch and write it to TON. The charger's balance is final, and anyone can check the proof.</p></li>
+    </ol>
+  </div>
+</section>
+
+<section class="band" aria-label="Network figures (simulated)">
+  <div class="stat" data-reveal><span class="big"><span data-count="184000">184,000</span></span><span class="cap">devices on testnet</span></div>
+  <div class="stat" data-reveal style="--i:1"><span class="big"><span data-count="1.28" data-dec="2">1.28</span>M</span><span class="cap">settlements a day</span></div>
+  <div class="stat" data-reveal style="--i:2"><span class="big"><span data-count="61">61</span></span><span class="cap">relay operators</span></div>
+</section>
+
+<section class="sec" id="token">
+  <p class="label" data-reveal>03 / The token</p>
+  <h2 data-reveal="clip">KVRA keeps the relays honest.</h2>
+  <div class="token-grid">
+    <ul class="roles">
+      <li data-reveal><span class="n">A</span><div><h3>Stake to run a relay</h3><p>Relays post KVRA as a bond. A relay that signs a bad batch loses it.</p></div></li>
+      <li data-reveal style="--i:1"><span class="n">B</span><div><h3>Earn the settlement fee</h3><p>Every batch pays its relay in USDT, shared with the people who staked behind it.</p></div></li>
+      <li data-reveal style="--i:2"><span class="n">C</span><div><h3>Vote on the limits</h3><p>Holders set batch size, fee floors and which device standards the network accepts.</p></div></li>
+    </ul>
+    <div class="alloc card" data-reveal="scale" data-tilt>
+      <div class="donut">
+        <svg viewBox="0 0 200 200" role="img" aria-label="KVRA allocation: community and presale 30%, network rewards 28%, team 18%, treasury 14%, investors 10%">
+          <circle class="seg" r="80" cx="100" cy="100" style="--p:30;--o:0;--c:#ffb224"/>
+          <circle class="seg" r="80" cx="100" cy="100" style="--p:28;--o:30;--c:#f2efe8"/>
+          <circle class="seg" r="80" cx="100" cy="100" style="--p:18;--o:58;--c:#b47a10"/>
+          <circle class="seg" r="80" cx="100" cy="100" style="--p:14;--o:76;--c:#8b8d92"/>
+          <circle class="seg" r="80" cx="100" cy="100" style="--p:10;--o:90;--c:#4b4d53"/>
+        </svg>
+        <div class="donut-mid"><b>1B</b><span>KVRA supply</span></div>
+      </div>
+      <ul class="legend">
+        <li style="--c:#ffb224"><span>Community and presale</span><b>30%</b></li>
+        <li style="--c:#f2efe8"><span>Network rewards</span><b>28%</b></li>
+        <li style="--c:#b47a10"><span>Team, 4-year vest</span><b>18%</b></li>
+        <li style="--c:#8b8d92"><span>Treasury</span><b>14%</b></li>
+        <li style="--c:#4b4d53"><span>Investors</span><b>10%</b></li>
+      </ul>
+      <p class="fine">Presale price 0.08 USDT per KVRA · round 2 of 3</p>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="roadmap">
+  <p class="label" data-reveal>04 / Roadmap</p>
+  <h2 data-reveal="clip">From testnet to open relays.</h2>
+  <ol class="road" data-reveal>
+    <li class="done"><span class="when">Q2 2026</span><h3>Relay testnet</h3><p>First 12 relays and the channel contracts go live on TON testnet.</p></li>
+    <li class="done"><span class="when">Q4 2026</span><h3>Device SDK</h3><p>Open SDK for Linux and ROS. Testnet passes 180,000 devices.</p></li>
+    <li class="now"><span class="when">15 Jan 2027</span><h3>KVRA token launch</h3><p>Presale closes, claims open and staking begins for the first relay set.</p></li>
+    <li><span class="when">Q2 2027</span><h3>Mainnet settlement</h3><p>Real USDT, audited contracts and the first fleet partners.</p></li>
+    <li><span class="when">Q4 2027</span><h3>Open relays</h3><p>Anyone with enough stake can run a relay. The founding set steps back.</p></li>
+  </ol>
+</section>
+
+<section class="sec join" id="join">
+  <div class="join-copy">
+    <p class="label" data-reveal>05 / Join</p>
+    <h2 data-reveal="clip">Three taps in Telegram.</h2>
+    <ol class="taps">
+      <li data-reveal><span class="n">1</span><div><h3>Open the Mini App</h3><p>It runs inside Telegram. Nothing to install.</p></div></li>
+      <li data-reveal style="--i:1"><span class="n">2</span><div><h3>Connect a TON wallet</h3><p>Tonkeeper or any wallet that speaks TON Connect.</p></div></li>
+      <li data-reveal style="--i:2"><span class="n">3</span><div><h3>Pay in USDT, claim KVRA</h3><p>Pick an amount, confirm in your wallet and claim your allocation.</p></div></li>
+    </ol>
+    <div class="cta" data-reveal style="--i:3">
+      <a class="btn primary big" href="app/">Open Mini App</a>
+      <span class="note">Runs on TON testnet. No real funds move.<br>No wallet? Demo mode walks you through it.</span>
+    </div>
+  </div>
+  <div class="phone-wrap" data-reveal="scale" aria-hidden="true">
+    <div class="phone">
+      <div class="p-top"><span class="p-brand">KELVARA</span><span class="p-badge">TESTNET</span></div>
+      <p class="p-k">You pay</p>
+      <p class="p-v">250 <small>USDT</small></p>
+      <div class="p-chips"><span>50</span><span class="on">250</span><span>1,000</span></div>
+      <p class="p-k">You get</p>
+      <p class="p-v amber">3,125 <small>KVRA</small></p>
+      <div class="p-row"><span>Price</span><span>0.08 USDT</span></div>
+      <div class="p-row"><span>Claim</span><span>at launch</span></div>
+      <div class="p-btn">Pay with USDT</div>
+      <div class="p-dots"><i class="on"></i><i class="on"></i><i></i></div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer class="foot">
+  <div class="foot-top">
+    <a class="brand" href="#top"><svg viewBox="0 0 28 28" aria-hidden="true"><rect x="1" y="1" width="26" height="26" rx="8" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="9" cy="19" r="3" fill="currentColor"/><circle cx="19" cy="9" r="3" fill="currentColor"/><path d="M11 17l6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>KELVARA</a>
+    <p class="foot-note"><b>Kelvara is a concept project by Numinae.</b> It is a portfolio sample, not a real token or network. Nothing is for sale, every figure on this page is simulated, and the Mini App runs on TON testnet only.</p>
+    <div class="foot-links">
+      <a href="https://github.com/NUMINAE">Numinae on GitHub</a>
+      <a href="https://t.me/bynuminae">Telegram channel</a>
+    </div>
+  </div>
+  <p class="foot-word" aria-hidden="true">KELVARA</p>
+</footer>
+
+<script src="assets/site.js" defer></script>
+</body>
+</html>

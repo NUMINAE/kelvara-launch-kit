@@ -1,0 +1,7 @@
+{
+  "name": "Kelvara Test USDT",
+  "symbol": "tUSDT",
+  "decimals": "6",
+  "description": "Faucet test token for the Kelvara concept on TON testnet. Not USDT and has no value.",
+  "image": "https://numinae.github.io/kelvara-launch-kit/app/icon-tusdt-180.png"
+}

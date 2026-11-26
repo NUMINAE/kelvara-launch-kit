@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Kelvara Mini App · concept project by Numinae</title>
+<meta name="description" content="Kelvara Mini App: a concept presale flow by Numinae. Demo mode needs no wallet; testnet mode uses TON testnet only.">
+<meta name="theme-color" content="#0b0c0e">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="../assets/fonts/archivo-latin-wdth-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="app.css">
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body>
+<aside class="frame-note" aria-label="About this page">
+  <a class="fn-brand" href="../">← Kelvara site</a>
+  <h1>The Kelvara<br>Mini App</h1>
+  <p>Pay in test USDT, then claim KVRA. Demo mode needs no wallet; switch to Testnet to use a real TON testnet wallet.</p>
+  <p class="fn-open">Open it in Telegram: <a href="https://t.me/KelvaraLaunchBot/app">t.me/KelvaraLaunchBot/app</a></p>
+  <p class="fn-small">Concept project by Numinae · not a real token · no real funds move</p>
+</aside>
+<div class="device">
+  <div class="screen">
+    <header id="top" class="top"></header>
+    <main id="view" class="view"></main>
+    <nav id="tabs" class="tabs" aria-label="Sections"></nav>
+    <div id="overlay"></div>
+    <div id="toast" role="status" aria-live="polite"></div>
+  </div>
+</div>
+<script src="app.js"></script>
+</body>
+</html>

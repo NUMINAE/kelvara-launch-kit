@@ -1,0 +1,10 @@
+{
+  "projects": [
+    {
+      "name": "kelvara",
+      "path": "./kelvara.tact",
+      "output": "./build",
+      "options": { "debug": false, "external": false }
+    }
+  ]
+}
