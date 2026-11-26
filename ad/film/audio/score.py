@@ -2,7 +2,7 @@
 # requires-python = ">=3.10"
 # dependencies = ["librosa>=0.10", "numpy", "scipy", "soundfile"]
 # ///
-"""Kelvara launch: bespoke minimal-tech score. 120 BPM, 4/4, 20 beats = 10.0 s, A minor.
+"""Kelvara launch: bespoke minimal-tech score. 120 BPM, 4/4, 30 beats = 15.0 s, A minor.
 
     MOTION_REEL_SKILL=<skill> uv run kelvara/audio/score.py
 
@@ -40,7 +40,7 @@ HERE = Path(__file__).resolve().parent
 FILM = HERE.parent
 BPM = 120
 BEAT = 60 / BPM
-DUR = 10.0
+DUR = 15.0
 N = int(SR * DUR)
 seed(20261126)
 
@@ -87,53 +87,52 @@ def sine_pad(notes, length, attack=0.6, release=0.8):
 def main():
     drums, bass, music, fx = (Bus(DUR, BPM) for _ in range(4))
 
-    # ---- hook b0-4: blips climbing the A minor 9 arpeggio on 8ths, a low pad swelling under
-    arp = ["A4", "C5", "E5", "B5", "A5", "E5", "C6", "B5"]
+    # ---- hook b0-6: blips climbing the A minor 9 arpeggio on 8ths, a low pad swelling under
+    arp = ["A4", "C5", "E5", "B5", "A5", "E5", "C6", "B5", "A5", "E5", "C6", "E6"]
     for i, nt in enumerate(arp):
-        music.add(sine_blip(nt, 0.22), i * 0.5, 0.34, pan=(-0.35 if i % 2 else 0.35))
-    music.add(sine_pad(["A2", "E3", "C4"], T(4.2), attack=1.4, release=0.4), 0, 0.42)
-    fx.add(riser(T(1)), 3, 0.12)
+        music.add(sine_blip(nt, 0.24), i * 0.5, 0.32, pan=(-0.35 if i % 2 else 0.35))
+    music.add(sine_pad(["A2", "E3", "C4"], T(6.2), attack=1.8, release=0.4), 0, 0.42)
+    fx.add(riser(T(1.5)), 4.5, 0.12)
 
-    # ---- groove b4-14
-    for b in range(4, 14):
+    # ---- groove b6-21.75
+    for b in range(6, 22):
         drums.add(kick(soft=True), b, 0.95)
-    for k in range(4 * 4, 14 * 4):
+    for k in range(6 * 4, 22 * 4 - 1):
         b = k / 4
-        g = 0.22 if k % 2 else 0.12
-        drums.add(tick(0.035 if k % 2 else 0.02), b, g, pan=0.2 if k % 4 == 1 else -0.15)
-    for b in (9, 11, 13):
+        drums.add(tick(0.035 if k % 2 else 0.02), b, 0.22 if k % 2 else 0.12, pan=0.2 if k % 4 == 1 else -0.15)
+    for b in (13, 15, 17, 19, 21):
         drums.add(soft_clap(), b, 0.5, pan=0.05)
-    bassline = {4: "A1", 6: "A1", 8: "F1", 10: "C2", 12: "G1"}
-    for b in np.arange(4, 14, 0.5):
-        root = bassline[int(b // 2 * 2)] if int(b // 2 * 2) in bassline else "A1"
+    roots = {6: "A1", 8: "A1", 10: "F1", 12: "A1", 14: "F1", 16: "C2", 18: "G1", 20: "A1"}
+    for b in np.arange(6, 21.75, 0.5):
         if b % 1 == 0.5:
-            bass.add(bass_note(root, 0.22, cutoff=500), b, 0.55)
-    chords = {4: ["A3", "C4", "E4", "B4"], 8: ["F3", "A3", "C4", "E4"], 10: ["C4", "E4", "G4", "B4"], 12: ["G3", "B3", "D4", "E4"]}
+            bass.add(bass_note(roots[int(b // 2 * 2)], 0.22, cutoff=500), b, 0.55)
+    chords = {6: ["A3", "C4", "E4", "B4"], 10: ["F3", "A3", "C4", "E4"], 12: ["A3", "C4", "E4", "B4"], 14: ["F3", "A3", "C4", "E4"],
+              16: ["C4", "E4", "G4", "B4"], 18: ["G3", "B3", "D4", "E4"], 20: ["A3", "C4", "E4", "B4"]}
     for b0, notes in chords.items():
-        length = T(4 if b0 == 4 else 2)
+        length = T(4 if b0 == 6 else (1.75 if b0 == 20 else 2))
         music.add(sine_pad(notes, length + 0.1, attack=0.05, release=0.2), b0, 0.28)
-    # blip motif answering the taps in the Mini App (pay @9, approve @10.5, claim @12)
-    for b, nt in ((9, "E6"), (9.25, "A6"), (10.5, "C6"), (10.75, "E6"), (12, "B5"), (12.25, "E6"), (13.5, "A6")):
+    # blips answering the taps in the Mini App: pay, approve, allocated, claim now, claim, approve, claimed
+    for b, nt in ((13.5, "E6"), (13.75, "A6"), (15, "C6"), (15.25, "E6"), (17.5, "B5"), (17.75, "E6"), (18.5, "C6"), (19.5, "E6"), (20.25, "A6")):
         music.add(sine_blip(nt, 0.18, 0.4), b, 0.22, pan=0.3)
-    for b in np.arange(4, 8, 0.5):
+    for b in np.arange(6, 12, 0.5):
         music.add(sine_blip(["A5", "E5", "C6", "E5"][int(b * 2) % 4], 0.12), b, 0.12, pan=-0.3)
 
-    # ---- figures b14-16: drums out, a tick roll and a riser that lands on the end card
-    for k in range(14 * 8, 16 * 8):
+    # ---- figures b21.75-25: drums out, a tick roll and a riser that lands on the end card
+    for k in range(int(21.75 * 8), 25 * 8):
         b = k / 8
-        drums.add(tick(0.02, 5000 + (b - 14) * 2500), b, 0.06 + 0.1 * (b - 14) / 2, pan=(-0.4 if k % 2 else 0.4))
-    music.add(sine_pad(["E3", "A3", "B3", "E4"], T(2.1), attack=0.3, release=0.1), 14, 0.3)
-    fx.add(riser(T(2)), 14, 0.22)
+        drums.add(tick(0.02, 5000 + (b - 21.75) * 1500), b, 0.06 + 0.1 * (b - 21.75) / 3.25, pan=(-0.4 if k % 2 else 0.4))
+    music.add(sine_pad(["E3", "A3", "B3", "E4"], T(3.35), attack=0.3, release=0.1), 21.75, 0.3)
+    fx.add(riser(T(2)), 23, 0.22)
 
-    # ---- end card b16-20
-    drums.add(kick(), 16, 1.0)
-    bass.add(sub_drop(1.6, 70, 34), 16, 0.6)
-    music.add(sine_pad(["A2", "E3", "B3", "C4", "G4"], T(4.4), attack=0.02, release=1.4), 16, 0.5)
-    for b, nt in ((16.5, "E6"), (17, "B5"), (17.5, "A5"), (18.5, "E5")):
-        music.add(sine_blip(nt, 0.6, 0.2), b, 0.16, pan=0.2)
+    # ---- end card b25-30
+    drums.add(kick(), 25, 1.0)
+    bass.add(sub_drop(1.8, 70, 34), 25, 0.6)
+    music.add(sine_pad(["A2", "E3", "B3", "C4", "G4"], T(5.3), attack=0.02, release=1.6), 25, 0.5)
+    for b, nt in ((25.5, "E6"), (26, "B5"), (26.5, "A5"), (27.5, "E5"), (28.5, "B4")):
+        music.add(sine_blip(nt, 0.7, 0.2), b, 0.16, pan=0.2)
 
     # ---- mix: kick pump, short room, highpass, peak normalise (mix.mjs masters to -14 LUFS)
-    kick_t = [T(b) for b in range(4, 14)] + [T(16)]
+    kick_t = [T(b) for b in range(6, 22)] + [T(25)]
     pump = sidechain(kick_t, bass.x.shape[1], 0.4, 0.09)
     ir = reverb_ir(1.6, 0.35)
     wet_src = music.x * 0.4 + fx.x * 0.2 + drums.x * 0.05
@@ -149,12 +148,12 @@ def main():
     # ---- grid: designed at 120 bpm; measured on a click stem of the beat positions so the
     # drum-less hook still anchors the grid
     click = np.zeros(N)
-    for b in range(20):
+    for b in range(30):
         s = int(T(b) * SR)
         click[s:s + 400] += np.hanning(800)[400:] * np.sign(np.sin(np.arange(400)))
-    grid = measure_beats(click, SR, BPM, n_beats=21)
+    grid = measure_beats(click, SR, BPM, n_beats=31)
     grid.update({"designed_bpm": BPM, "downbeats": grid["beats"][::4],
-                 "sections": {"hook": [0, 4], "machines": [4, 8], "miniapp": [8, 14], "figures": [14, 16], "end": [16, 20]},
+                 "sections": {"hook": [0, 6], "machines": [6, 12], "miniapp": [12, 21.75], "figures": [21.75, 25], "end": [25, 30]},
                  "source": "kelvara/audio/score.py, synthesized at 120 bpm"})
     (FILM / "beats.json").write_text(json.dumps(grid, indent=1))
     print(f"beats: {grid['bpm']} bpm, offset {grid['offset'] * 1000:.1f} ms, period {grid['period']:.4f}")

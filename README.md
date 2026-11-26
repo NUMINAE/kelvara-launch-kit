@@ -50,7 +50,7 @@ The first faucet tap and the first payment carry the contracts' code, so nothing
 
 ## 3. Launch ad
 
-`ad/`. 10 seconds, 1920×1080 and 1080×1920, 60 fps, with its own score and sound effects.
+`ad/`. 15 seconds, 1920×1080 and 1080×1920, 60 fps, with its own score and sound effects.
 
 1. The lattice wakes up under "Machines pay machines." and the camera dives into an amber node.
 2. That node becomes a drone's charging ring, then whip pans to a charger and a delivery robot, each with a live payment tag.

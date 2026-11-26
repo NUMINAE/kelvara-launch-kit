@@ -21,3 +21,6 @@ Scores 1-10: hook · readability at phone size · motion quality · variety · b
 - 9:16 tiles too small; 16:9 countdown overflowed its tile. Fixed: wider portrait tiles, smaller 16:9 countdown.
 
 Final: hook 8 · readability 8 · motion 8 · variety 8 · brand 9 · sync 9
+
+## Round 4: retime to 15 s
+Feedback: the 10 s cut was too fast to follow. Kept every scene and stretched them over 30 beats (WARP in film.js); the score was rebuilt for 30 beats. Each Mini App receipt now holds about 1 s. Sync median 3.8 ms, 24/26 hits within 20 ms (same two expected misses).

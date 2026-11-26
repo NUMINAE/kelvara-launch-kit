@@ -306,7 +306,7 @@ function sceneFigures(ctx, u, t) {
   const roll = E.outCubic(prog(u, 14, 15.2));
   const raised = 18_412_640 * (0.55 + 0.45 * roll) + Math.floor(prog(u, 15.2, 16) * 4) * 250;
   // the countdown ticks with the film's clock: 50d 02h 33m, seconds running down
-  const secs = 50 * 86400 + 2 * 3600 + 33 * 60 + 20 - Math.floor(M.TS(u) - M.TS(14));
+  const secs = 50 * 86400 + 2 * 3600 + 33 * 60 + 20 - Math.floor(t - M.TS(UNWARP(14)));
   const d = Math.floor(secs / 86400), hh = Math.floor((secs % 86400) / 3600), mm = Math.floor((secs % 3600) / 60), ss = secs % 60;
   const p2 = (n) => String(n).padStart(2, '0');
   const tiles = [
@@ -393,13 +393,30 @@ function endCard(ctx, u, t) {
   }
 }
 
+
+// ---------------------------------------------------------------- pacing
+// The film runs 15 s / 30 beats. Scenes are written on a 20-beat plan; WARP maps a film beat to
+// that plan, piecewise-linear, so every shot holds longer and the app's receipts stay readable.
+const KNOTS = [[0, 0], [6, 4], [12, 8], [13.5, 9], [15, 10.5], [15.5, 11], [17.5, 12], [18.5, 12.5], [19.5, 13], [20.25, 13.5],
+  [21.6, 13.6], [21.75, 13.75], [23.25, 14.5], [24.4, 15.4], [25, 16], [26.5, 17.5], [30, 20]];
+function pw(x, a, b) {
+  if (x <= KNOTS[0][a]) return KNOTS[0][b] + (x - KNOTS[0][a]);
+  for (let i = 1; i < KNOTS.length; i++) {
+    const [p, q] = [KNOTS[i - 1], KNOTS[i]];
+    if (x <= q[a]) return p[b] + ((x - p[a]) / (q[a] - p[a])) * (q[b] - p[b]);
+  }
+  const L = KNOTS[KNOTS.length - 1]; return L[b] + (x - L[a]);
+}
+const WARP = (u) => pw(u, 0, 1);      // film beat -> plan beat
+const UNWARP = (v) => pw(v, 1, 0);    // plan beat -> film beat
+
 // ---------------------------------------------------------------- film
 M.film({
   fonts: [font(100, 800, 'Display'), font(100, 700, 'Display'), font(100, 600, 'Display'), font(40, 500, 'UI')],
   images: IMAGES,
-  hits: HITS,
+  hits: HITS.map(([b, ...r]) => [Math.round(UNWARP(b) * 1000) / 1000, ...r]),
   // motion blur sub-frames: more on whips, fewer where 3-D is expensive
-  samples: (t) => { const u = M.U(t); return u > 13.9 && u < 15.5 ? 1 : (u > 5.2 && u < 5.8) || (u > 6.7 && u < 7.3) || (u > 7.7 && u < 8.1) ? 8 : u < 4 || (u > 7.9 && u < 14.4) ? 3 : 4; },
+  samples: (t) => { const u = WARP(M.U(t)); return u > 13.9 && u < 15.5 ? 1 : (u > 5.2 && u < 5.8) || (u > 6.7 && u < 7.3) || (u > 7.7 && u < 8.1) ? 8 : u < 4 || (u > 7.9 && u < 14.4) ? 3 : 4; },
   async init(ctx, images) {
     IMG = images;
     await G.initGL({ exposure: 1.0 });
@@ -407,7 +424,8 @@ M.film({
     const tp = await fetch('assets/miniapp/taps.json').then((r) => r.json());
     TAPS = [[9, tp.pay.x, tp.pay.y], [10.5, tp.approvePay.x, tp.approvePay.y], [12, tp.claimNow.x, tp.claimNow.y], [12.5, tp.claim.x, tp.claim.y], [13, tp.approveClaim.x, tp.approveClaim.y]];
   },
-  draw(ctx, u, t) {
+  draw(ctx, uf, t) {
+    const u = WARP(uf);
     if (u < 4) sceneLattice(ctx, u, t);
     else if (u < 8) sceneMachines(ctx, u);
     else if (u < 13.85) sceneApp(ctx, u, t);

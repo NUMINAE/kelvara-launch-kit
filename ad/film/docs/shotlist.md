@@ -1,5 +1,5 @@
 # Kelvara launch: shot list
-10 s · 120 bpm · 20 beats (1 beat = 0.5 s) · formats: 16x9 (primary), 9x16 · 60 fps
+15 s · 120 bpm · 30 beats (1 beat = 0.5 s). Retimed from the first 10 s cut, which was too fast to follow · formats: 16x9 (primary), 9x16 · 60 fps
 Music: bespoke minimal-tech score (soft kick, clean sine blips, sub bass, one bell on the logo) · VO: none
 
 | # | beats | time | shot | on screen (asset) | motion | out (transition) | sound (hits) |
@@ -18,3 +18,15 @@ Formats:
 - 16x9: headline left, lattice right (as on the site); phone right of centre, headline left; tiles in one row of four.
 
 Longest gap without a new event: beats 14-16 (1.0 s). Every shot uses a real asset: the site's own lattice scene, the three Flux 2 finals and frames captured from the real Mini App. No invented screens.
+
+## Retime to 15 s (after review: "way too fast")
+
+| # | shot | 10 s cut | 15 s cut |
+|---|------|----------|----------|
+| 1 | Hook: the network wakes | 0.0-2.0 s | 0.0-3.0 s |
+| 2-4 | Machines: drone, charger, robot | 0.75 s each | 1.0 s each (3.0-6.0 s) |
+| 5 | The Mini App: pay, then claim | 3.0 s | 5.0 s (6.0-10.9 s); each receipt holds about 1 s |
+| 6 | Launch figures | 1.0 s | 1.5 s |
+| 7 | End card | 2.0 s | 2.5 s |
+
+The scenes are unchanged; `WARP` in film.js maps the 30 film beats onto the original 20-beat plan, and the score was rebuilt for 30 beats.
