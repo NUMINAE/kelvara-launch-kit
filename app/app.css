@@ -243,3 +243,6 @@ input[type=range]::-moz-range-thumb{width:24px;height:24px;border:0;border-radiu
 .has-sub #toast{bottom:20px}
 
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+
+/* presentation mode (?present=1), used only to film the launch ad */
+.present .seg,.present .sheet-note,.present em{display:none}

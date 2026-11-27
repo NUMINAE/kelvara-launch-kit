@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=390">
+<title>Kelvara bot chat (for the launch ad)</title>
+<style>
+@font-face{font-family:'Archivo';src:url(../../fonts/display.woff2) format('woff2');font-weight:100 900}
+@font-face{font-family:'Mono';src:url(../../fonts/ui.woff2) format('woff2');font-weight:100 800}
+*{box-sizing:border-box;margin:0;padding:0}
+body{width:390px;height:812px;overflow:hidden;background:#0d0e11;color:#f2efe8;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+.head{display:flex;align-items:center;gap:12px;padding:58px 16px 14px;background:#15161a;border-bottom:1px solid rgba(255,255,255,.06)}
+.back{width:22px;height:22px;fill:none;stroke:#9a9ca1;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.ava{width:42px;height:42px;border-radius:50%;background:#0b0c0e;display:grid;place-items:center;border:1px solid rgba(255,178,36,.4)}
+.ava svg{width:24px;height:24px;color:#ffb224}
+.who b{display:block;font-size:17px;font-weight:600}
+.who span{font-size:13px;color:#9a9ca1}
+.chat{position:absolute;left:0;right:0;top:115px;bottom:70px;padding:16px 12px;display:flex;flex-direction:column;justify-content:flex-end;gap:10px;background:radial-gradient(80% 50% at 80% 20%,rgba(255,178,36,.07),transparent 70%),#0d0e11}
+.day{align-self:center;font-size:12px;color:#9a9ca1;background:rgba(255,255,255,.06);padding:4px 10px;border-radius:999px;margin-bottom:4px}
+.msg{max-width:84%;background:#1b1c21;border-radius:18px 18px 18px 6px;padding:10px 12px 8px;font-size:15.5px;line-height:1.38}
+.msg.me{align-self:flex-end;background:#3a2a0b;border-radius:18px 18px 6px 18px}
+.msg .t{display:block;text-align:right;font-size:11px;color:#9a9ca1;margin-top:2px}
+.card{max-width:84%;border-radius:18px 18px 18px 6px;overflow:hidden;background:#1b1c21}
+.card .img{height:150px;background:#0b0c0e;position:relative;overflow:hidden}
+.card .img i{position:absolute;border-radius:50%;background:#ffb224}
+.card .img .w{position:absolute;left:16px;bottom:14px;font-family:'Archivo';font-stretch:125%;font-weight:800;font-size:28px;line-height:.95;letter-spacing:-.02em}
+.card .img .w span{color:#ffb224}
+.card .tx{padding:10px 12px 8px;font-size:15.5px;line-height:1.38}
+.card .tx b{font-weight:600}
+.card .tx .t{display:block;text-align:right;font-size:11px;color:#9a9ca1;margin-top:2px}
+.btn{max-width:84%;width:84%;display:flex;align-items:center;justify-content:center;gap:8px;height:44px;border-radius:14px;background:rgba(255,178,36,.16);color:#ffb224;font-weight:600;font-size:15px;margin-top:-4px}
+.bar{position:absolute;left:0;right:0;bottom:0;height:70px;display:flex;align-items:center;gap:10px;padding:0 12px 6px;background:#15161a;border-top:1px solid rgba(255,255,255,.06)}
+.menu{height:40px;padding:0 14px;border-radius:12px;background:#ffb224;color:#141005;font-weight:700;font-size:14px;display:flex;align-items:center}
+.input{flex:1;height:40px;border-radius:20px;background:#0d0e11;color:#6b6d72;font-size:15px;display:flex;align-items:center;padding:0 16px}
+</style>
+</head>
+<body>
+<header class="head">
+  <svg class="back" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>
+  <div class="ava"><svg viewBox="0 0 28 28"><rect x="1" y="1" width="26" height="26" rx="8" fill="none" stroke="currentColor" stroke-width="2.4"/><circle cx="9" cy="19" r="3" fill="currentColor"/><circle cx="19" cy="9" r="3" fill="currentColor"/><path d="M11 17l6-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg></div>
+  <div class="who"><b>Kelvara</b><span>bot</span></div>
+</header>
+<main class="chat">
+  <span class="day">Today</span>
+  <div class="msg me">/start<span class="t">12:00</span></div>
+  <div class="card">
+    <div class="img" id="art"><p class="w">Machines pay<br><span>machines.</span></p></div>
+    <div class="tx"><b>The KVRA presale is live.</b><br>Round 2 of 3 at 0.08 USDT. Pay in USDT and claim your KVRA right here.<span class="t">12:00</span></div>
+  </div>
+  <div class="btn" id="open">Join the presale</div>
+</main>
+<footer class="bar"><span class="menu">Open Kelvara</span><span class="input">Message</span></footer>
+<script>
+// a few lattice nodes on the message card, seeded so every capture is identical
+const art = document.getElementById('art'); let s = 7;
+const r = () => ((s = (s * 16807) % 2147483647) / 2147483647);
+for (let i = 0; i < 26; i++) { const d = document.createElement('i'); const z = i % 7 === 0 ? 7 : 3; Object.assign(d.style, { width: z + 'px', height: z + 'px', left: (236 + r() * 130) + 'px', top: (10 + r() * 62) + 'px', opacity: i % 7 === 0 ? 1 : 0.45 }); art.appendChild(d); }
+</script>
+</body>
+</html>

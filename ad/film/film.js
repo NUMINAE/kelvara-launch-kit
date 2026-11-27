@@ -13,14 +13,18 @@ const P = FORMAT.portrait;
 const C = { bg: '#0b0c0e', bg2: '#111215', ink: '#f2efe8', mut: '#9a9ca1', acc: '#ffb224', accInk: '#141005', line: 'rgba(255,255,255,0.12)' };
 
 // Every accent: [beat, label, sfx, opts]. sfx.mjs voices each one.
+// [beat, label, sfx, opts]. Beats are plan beats (u); entries with { film: true } are already film beats (uf).
 const HITS = [
   [0, 'Machines', 'blip', { pitch: 'A5' }], [1, 'pay', 'blip', { pitch: 'C6' }], [2, 'machines.', 'pop', { pitch: 'E6' }],
   [4, 'dive into the node', 'swell', { len: 0.8 }], [4, 'drone', 'thud', { pitch: 70, to: 45 }],
-  [4.5, 'tag 1', 'type', { len: 0.45, n: 9 }], [5.5, 'whip to charger', 'whoosh', { len: 0.4, from: 900, to: 3200, pan: 0.3 }],
-  [6, 'tag 2', 'type', { len: 0.4, n: 8 }], [7, 'whip to robot', 'whoosh', { len: 0.4, from: 900, to: 3200, pan: -0.3 }],
-  [7.5, 'tag 3', 'type', { len: 0.35, n: 7 }], [7.85, 'amber line', 'whoosh', { len: 0.3, from: 3000, to: 700 }],
-  [8, 'phone lands', 'thud'], [9, 'tap Pay', 'click'], [10.5, 'tap Approve', 'click'], [11, 'allocated', 'bell', { pitch: 'E6' }],
-  [12, 'tap Claim now', 'click'], [12.5, 'tap Claim', 'click'], [13, 'tap Approve', 'click'], [13.5, 'claimed', 'coins'],
+  [4.1, 'card 1', 'pop', { pitch: 'E6' }], [5.0, 'whip to charger', 'whoosh', { len: 0.5, from: 900, to: 3200, pan: 0.3 }],
+  [5.5, 'card 2', 'pop', { pitch: 'A6' }], [6.35, 'whip to robot', 'whoosh', { len: 0.5, from: 900, to: 3200, pan: -0.3 }],
+  [6.9, 'card 3', 'pop', { pitch: 'C6' }],
+  [12.75, 'phone lands', 'thud', { film: true }], [13.5, 'tap Join', 'click', { film: true }],
+  [13.6, 'Mini App slides up', 'whoosh', { len: 0.4, from: 2500, to: 700, film: true }],
+  [15.25, 'tap Pay', 'click', { film: true }], [16.1, 'tap Approve', 'click', { film: true }], [16.7, 'allocated', 'bell', { pitch: 'E6', film: true }],
+  [17.5, 'tap Claim now', 'click', { film: true }], [18.25, 'tap Claim', 'click', { film: true }], [19, 'tap Approve', 'click', { film: true }],
+  [19.6, 'claimed', 'coins', { film: true }],
   [13.75, 'tile 1', 'tick'], [14, 'tile 2', 'tick'], [14.25, 'tile 3', 'tick'], [14.5, 'tile 4', 'tick'],
   [16, 'end card', 'impact'], [16, 'wordmark', 'bell', { pitch: 'A6' }], [17.5, 'presale pill', 'pop', { pitch: 'E6' }],
 ];
@@ -28,7 +32,8 @@ const HITS = [
 const IMAGES = {};
 for (const n of ['drone', 'charger', 'robot']) IMAGES[n] = `assets/img/${n}-${P ? 'tall' : 'wide'}.png`;
 const APP = ['01-buy', '02-approve-pay', '03-progress-pay', '04-receipt-pay', '05-claim', '06-approve-claim', '07-progress-claim', '08-receipt-claim'];
-APP.forEach((n) => { IMAGES['app_' + n] = `assets/miniapp/${n}.png`; });
+APP.forEach((n) => { IMAGES['app3_' + n] = `assets/miniapp4/${n}.png`; });
+IMAGES.chat = 'assets/chat/chat.png';
 // when each captured Mini App state comes on screen, and where/when each tap lands (assets/miniapp/taps.json)
 const APP_AT = [8, 9.15, 10.62, 11, 12.12, 12.62, 13.12, 13.5];
 let TAPS = [];
@@ -131,7 +136,7 @@ function headline(ctx, u) {
   words.forEach(([w, b, col], i) => {
     rise(ctx, w, x, y0 + i * size * 0.98, u, b - (i === 0 ? 0.3 : 0.1), { size, weight: 800, color: col, track: -0.035, cfg: SPRING.snappy, stagger: 0.045, out: 3.0 + i * 0.1, outLen: 0.75 });
   });
-  const a = E.outCubic(prog(u, 2.2, 3.0)) * (1 - prog(u, 3.1, 3.6));
+  const a = E.outCubic(prog(u, 1.9, 2.3)) * (1 - prog(u, 3.1, 3.6));
   if (a > 0) {
     ctx.globalAlpha = a;
     text(ctx, 'THE SETTLEMENT NETWORK FOR AUTONOMOUS DEVICES', x, y0 + size * 2.98 + 56, font(P ? 25 : 24, 500, 'UI'), C.mut, 'left', 2);
@@ -174,43 +179,79 @@ function still(ctx, name, u, u0, u1, dx = 0) {
   ctx.fillStyle = 'rgba(11,12,14,0.18)'; ctx.fillRect(0, 0, W, H);
   ctx.restore();
 }
-function tag(ctx, name, u, u0, u1) {
-  const [a, b, amt, ms] = SHOTS[name].tag;
-  const str = `${a}  →  ${b}   ·   ${amt}   ·   ${ms}`;
-  const n = Math.floor(clamp(prog(u, u0, u0 + 0.8)) * str.length);
-  if (n <= 0) return;
-  const out = E.inOutCubic(prog(u, u1 - 0.35, u1));
-  const sz = FORMAT.pick({ '16x9': 30, '9x16': 30 });
-  const f = font(sz, 500, 'UI');
-  ctx.font = f;
-  const full = ctx.measureText(str).width;
-  const padX = 30, h = sz * 2.3, w = full + padX * 2 + 34;
+// Where each machine's own amber light sits in its still (0..1), for the card's leader line.
+const LIGHT = {
+  drone: { wide: [0.512, 0.403], tall: [0.528, 0.377] },
+  charger: { wide: [0.445, 0.5], tall: [0.53, 0.45] },
+  robot: { wide: [0.53, 0.57], tall: [0.58, 0.62] },
+};
+const CARD = {
+  drone: { from: 'DRONE-12', to: 'CHARGER-04', amt: '0.42 USDT', ms: '388 ms', side: 1 },
+  charger: { from: 'VAN-31', to: 'GATE-07', amt: '1.10 USDT', ms: '402 ms', side: 1 },
+  robot: { from: 'ROVER-05', to: 'DOCK-11', amt: '0.08 USDT', ms: '371 ms', side: -1 },
+};
+// screen position of a point in a cover-fitted still (same maths as M.cover)
+function coverPoint(img, fx, fy, zoom, nx, ny, dx = 0) {
+  const sc = Math.max(W / img.width, H / img.height) * zoom, dw = img.width * sc, dh = img.height * sc;
+  return [dx + (W - dw) * fx + nx * dw, (H - dh) * fy + ny * dh];
+}
+// A payment card tied to the machine by a leader line. It arrives whole (no typing) and holds.
+function payCard(ctx, name, u, u0, u1, anchor) {
+  const k = springU(u, u0, SPRING.snappy);
+  if (k <= 0.001) return;
+  const out = E.inOutCubic(prog(u, u1 - 0.3, u1));
+  const c = CARD[name];
+  const [ax, ay] = anchor;
+  const cw = FORMAT.pick({ '16x9': 640, '9x16': 760 }), ch = FORMAT.pick({ '16x9': 236, '9x16': 256 });
   const s = FORMAT.safe;
-  const x = P ? (W - w) / 2 : s.x, y = P ? s.y + s.h - h : H - s.y - h - 10;
-  ctx.save(); ctx.globalAlpha = 1 - out; ctx.translate(0, out * 30);
-  ctx.fillStyle = 'rgba(11,12,14,0.78)'; rrect(ctx, x, y, w, h, h / 2); ctx.fill();
-  ctx.strokeStyle = 'rgba(255,178,36,0.45)'; ctx.lineWidth = 2; rrect(ctx, x + 1, y + 1, w - 2, h - 2, h / 2 - 1); ctx.stroke();
-  ctx.fillStyle = C.acc; ctx.beginPath(); ctx.arc(x + padX + 6, y + h / 2, 7, 0, 7); ctx.fill();
-  text(ctx, str.slice(0, n), x + padX + 30, y + h / 2 + sz * 0.36, f, C.ink);
-  // the payment itself: a dot runs the pill once the text is typed
-  const r = prog(u, u0 + 0.8, u0 + 1.7);
-  if (r > 0 && r < 1) {
-    const px = x + 20 + (w - 40) * E.inOutCubic(r);
-    const g = ctx.createRadialGradient(px, y + h, 0, px, y + h, 26);
-    g.addColorStop(0, 'rgba(255,190,70,1)'); g.addColorStop(1, 'rgba(255,178,36,0)');
-    ctx.fillStyle = g; ctx.fillRect(px - 30, y + h - 30, 60, 60);
-  }
+  let cx, cy;
+  if (P) { cx = (W - cw) / 2; cy = s.y + s.h - ch - 40; }
+  else { cx = c.side > 0 ? Math.min(ax + 170, W - s.x - cw) : Math.max(ax - 170 - cw, s.x); cy = clamp(ay - ch - 90, s.y + 20, H - s.y - ch); }
+  ctx.save();
+  ctx.globalAlpha = 1 - out;
+  // anchor ring and leader line, drawn from the light outward
+  const pulse = (u - u0) % 1;
+  ctx.strokeStyle = C.acc; ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.arc(ax, ay, 16, 0, 7); ctx.stroke();
+  ctx.globalAlpha = (1 - out) * (1 - pulse);
+  ctx.beginPath(); ctx.arc(ax, ay, 16 + 34 * E.outCubic(pulse), 0, 7); ctx.stroke();
+  ctx.globalAlpha = 1 - out;
+  ctx.fillStyle = C.acc; ctx.beginPath(); ctx.arc(ax, ay, 6, 0, 7); ctx.fill();
+  const ex = P ? W / 2 : (c.side > 0 ? cx : cx + cw), ey = P ? cy : cy + ch / 2;
+  const lk = E.outCubic(clamp(k * 1.2));
+  ctx.lineWidth = 2.5; ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(lerp(ax, ex, lk), lerp(ay, ey, lk)); ctx.stroke();
+  // the card
+  ctx.translate(0, (1 - k) * 40);
+  ctx.globalAlpha = (1 - out) * Math.min(1, k * 1.5);
+  ctx.fillStyle = 'rgba(11,12,14,0.86)'; rrect(ctx, cx, cy, cw, ch, 30); ctx.fill();
+  ctx.strokeStyle = 'rgba(255,178,36,0.5)'; ctx.lineWidth = 2; rrect(ctx, cx + 1, cy + 1, cw - 2, ch - 2, 29); ctx.stroke();
+  const px = cx + 36;
+  text(ctx, `${c.from}  →  ${c.to}`, px, cy + 58, font(P ? 30 : 28, 500, 'UI'), C.mut, 'left', 1);
+  text(ctx, c.amt, px, cy + 58 + (P ? 96 : 88), font(P ? 92 : 84, 800, 'Display'), C.acc, 'left', -2);
+  ctx.fillStyle = C.acc; ctx.beginPath(); ctx.arc(px + 8, cy + ch - 42, 7, 0, 7); ctx.fill();
+  text(ctx, `paid and settled in ${c.ms}`, px + 28, cy + ch - 32, font(P ? 30 : 28, 500, 'UI'), C.ink, 'left', 0);
   ctx.restore();
+}
+function cardFor(ctx, name, u, u0, u1, dx) {
+  const o = SHOTS[name][P ? 'tall' : 'wide'];
+  const [nx, ny] = LIGHT[name][P ? 'tall' : 'wide'];
+  // the still's push at this moment (matches still())
+  let zoom, fy = o.fy;
+  const p = name === 'drone' ? 0 : clamp((u - (name === 'charger' ? 5.0 : 6.35)) / ((name === 'charger' ? 7.05 : 8.2) - (name === 'charger' ? 5.0 : 6.35)));
+  if (name === 'drone') { const k = springU(u, 3.9, SPRING.gentle); fy = lerp(0.78, o.fy, k); zoom = lerp(1.9, 1.1, k) * (1 + 0.04 * prog(u, 4, 5.6)); }
+  else { zoom = 1.06 * (1.16 / 1.06) ** p; }
+  const fx = name === 'drone' ? o.fx : clamp(o.fx + 0.02 * p);
+  payCard(ctx, name, u, u0, u1, coverPoint(IMG[name], fx, fy, zoom, nx, ny, dx));
 }
 function sceneMachines(ctx, u) {
   // drone b4-5.5, whip, charger b5.5-7, whip, robot b7-8 (a whip keeps both shots on screen)
-  const w1 = E.inOutCubic(prog(u, 5.05, 5.95)), w2 = E.inOutCubic(prog(u, 6.55, 7.45));
-  if (u < 5.95) still(ctx, 'drone', u, 4, 5.95, -w1 * W);
-  if (u > 5.05 && u < 7.45) still(ctx, 'charger', u, 5.05, 7.45, (1 - w1) * W - w2 * W);
-  if (u > 6.55) still(ctx, 'robot', u, 6.55, 8.2, (1 - w2) * W);
-  if (u < 5.1) tag(ctx, 'drone', u, 4.2, 5.05);
-  if (u > 5.8 && u < 6.6) tag(ctx, 'charger', u, 5.8, 6.55);
-  if (u > 7.3) tag(ctx, 'robot', u, 7.3, 8.0);
+  const w1 = E.inOutCubic(prog(u, 5.0, 5.7)), w2 = E.inOutCubic(prog(u, 6.35, 7.05));
+  if (u < 5.7) still(ctx, 'drone', u, 4, 5.7, -w1 * W);
+  if (u > 5.0 && u < 7.05) still(ctx, 'charger', u, 5.0, 7.05, (1 - w1) * W - w2 * W);
+  if (u > 6.35) still(ctx, 'robot', u, 6.35, 8.2, (1 - w2) * W);
+  if (u < 5.5) cardFor(ctx, 'drone', u, 4.1, 5.45, -w1 * W);
+  if (u > 5.45 && u < 6.8) cardFor(ctx, 'charger', u, 5.5, 6.75, (1 - w1) * W - w2 * W);
+  if (u > 6.85) cardFor(ctx, 'robot', u, 6.9, 7.9, (1 - w2) * W);
   // b7.8-8: the robot's amber band stretches into a line that wipes to the phone
   const k = E.inOutCubic(prog(u, 7.55, 8.0));
   if (k > 0) {
@@ -279,6 +320,214 @@ function sceneApp(ctx, u, t) {
   }
 }
 
+
+// ---------------------------------------------------------------- S3 the Mini App, inside Telegram (2-D, flat-on phone)
+// Keyed to FILM beats (uf). The screen shows the real Mini App, captured in presentation mode (?present=1),
+// after the Kelvara bot's chat. Taps land where the real buttons are (assets/miniapp4/taps.json).
+const SCR = [['chat', 12.5], ['01-buy', 14.25], ['02-approve-pay', 15.4], ['03-progress-pay', 16.2], ['04-receipt-pay', 16.7],
+  ['05-claim', 17.65], ['06-approve-claim', 18.4], ['07-progress-claim', 19.1], ['08-receipt-claim', 19.6]];
+let TAPS2 = [];
+const STEPS = [['Open the bot', 't.me/KelvaraLaunchBot', 12.5], ['Pay in USDT', '250 USDT  →  3,125 KVRA', 14.25], ['Claim KVRA', 'minted to your wallet', 17.5]];
+// iPhone-style handset, drawn flat-on: titanium band, thin even black border, Dynamic Island, iOS status bar.
+const PB = () => (P ? 24 : 19);               // frame + border per side
+function phoneBox() {
+  const B = PB();
+  if (P) { const h = 1240, w = h * 0.48 + 2 * B; return { x: (W - w) / 2, y: 520, w, h: h + 2 * B }; }
+  const h = 930, w = h * 0.48 + 2 * B; return { x: 1330 - w / 2, y: 74, w, h: h + 2 * B };
+}
+function tgHeader(c, x, y, w, hh) {
+  c.fillStyle = '#15161a'; c.fillRect(x, y, w, hh);
+  c.fillStyle = 'rgba(255,255,255,0.06)'; c.fillRect(x, y + hh - 1, w, 1);
+  const fs = hh * 0.36;
+  text(c, 'Close', x + hh * 0.42, y + hh * 0.62, `500 ${fs}px system-ui, sans-serif`, '#ffb224', 'left');
+  text(c, 'Kelvara', x + w / 2, y + hh * 0.62, `600 ${fs * 1.05}px system-ui, sans-serif`, '#f2efe8', 'center');
+  c.fillStyle = '#9a9ca1'; [-1, 0, 1].forEach((d) => { c.beginPath(); c.arc(x + w - hh * 0.6 + d * fs * 0.42, y + hh * 0.5, fs * 0.09, 0, 7); c.fill(); });
+}
+function screenAt(c, x, y, w, h, uf) {
+  let i = 0; SCR.forEach(([, b], k) => { if (uf >= b) i = k; });
+  const sb = h * 0.062;   // iOS status bar
+  const hh = h * 0.058;   // Telegram's Mini App header
+  const ay = y + sb + hh, ah = h - sb - hh;
+  const fit = () => ({ dx: x, dw: w, dh: ah });   // captured at exactly this viewport (390 x 715)
+  const app = (name, alpha = 1, dy = 0) => {
+    const im = IMG['app3_' + name];
+    c.save(); c.globalAlpha = alpha; c.translate(0, dy);
+    c.drawImage(im, x, ay, w, ah);
+    tgHeader(c, x, y + sb, w, hh);
+    c.restore();
+  };
+  if (uf < 14.3) c.drawImage(IMG.chat, x, y, w, h);
+  if (uf >= 13.6 && i <= 1) {
+    const e = E.inOutCubic(prog(uf, 13.6, 14.25));
+    c.save(); c.fillStyle = `rgba(0,0,0,${0.45 * e})`; c.fillRect(x, y, w, h); c.restore();
+    c.save(); c.beginPath(); c.roundRect(x, y + sb + (1 - e) * (h - sb), w, h, [w * 0.05, w * 0.05, 0, 0]); c.clip();
+    app('01-buy', 1, (1 - e) * (h - sb)); c.restore();
+  } else if (i >= 1) {
+    app(SCR[i][0]);
+    const nx = SCR[i + 1];
+    if (nx) { const k = E.inOutCubic(prog(uf, nx[1] - 0.18, nx[1])); if (k > 0) app(nx[0], k); }
+  }
+  // status bar sits on Telegram's dark header colour
+  if (i >= 1 || uf >= 14.25) { c.fillStyle = '#15161a'; c.fillRect(x, y, w, sb); }
+  statusBar(c, x, y, w, sb);
+  // touches: a fingertip arrives, presses, leaves a ring
+  TAPS2.forEach(([b, tx, ty, onChat]) => {
+    const rb = FAST(b), pre = prog(RNOW, rb - 0.9, rb), post = prog(RNOW, rb, rb + 0.8);
+    if (pre <= 0 || post >= 1) return;
+    const f = fit();
+    const px = onChat ? x + tx * w : f.dx + tx * f.dw, py = onChat ? y + ty * h : ay + ty * f.dh;
+    const r0 = w * 0.06;
+    if (post === 0) { c.fillStyle = `rgba(255,255,255,${0.35 * E.outCubic(pre)})`; c.beginPath(); c.arc(px, py, r0 * (1 - 0.18 * E.inCubic(prog(RNOW, rb - 0.2, rb))), 0, 7); c.fill(); }
+    else { c.strokeStyle = `rgba(255,255,255,${0.8 * (1 - post)})`; c.lineWidth = w * 0.008; c.beginPath(); c.arc(px, py, r0 + w * 0.09 * E.outCubic(post), 0, 7); c.stroke(); }
+  });
+  // home indicator
+  c.fillStyle = 'rgba(255,255,255,0.86)'; rrect(c, x + w * 0.32, y + h - h * 0.014, w * 0.36, h * 0.0062, h * 0.0031); c.fill();
+}
+function statusBar(c, x, y, w, sb) {
+  const cy = y + sb * 0.56, ink = '#f5f5f7', fs = sb * 0.36;
+  text(c, '9:41', x + w * 0.155, cy + fs * 0.36, `600 ${fs}px "DM Sans", system-ui, sans-serif`, ink, 'center');
+  const s = fs / 20; let rx = x + w * 0.9;
+  // battery
+  c.save(); c.strokeStyle = 'rgba(245,245,247,0.45)'; c.lineWidth = 1.3 * s;
+  rrect(c, rx - 26 * s, cy - 6.5 * s, 25 * s, 13 * s, 4 * s); c.stroke();
+  c.fillStyle = ink; rrect(c, rx - 24 * s, cy - 4.5 * s, 21 * s * 0.82, 9 * s, 2.4 * s); c.fill();
+  c.fillStyle = 'rgba(245,245,247,0.45)'; rrect(c, rx + 0.5 * s, cy - 2.5 * s, 2 * s, 5 * s, 1 * s); c.fill();
+  rx -= 34 * s;
+  // wi-fi
+  c.strokeStyle = ink; c.lineCap = 'round'; c.lineWidth = 2.1 * s;
+  const wy = cy + 5.5 * s;
+  [11, 7.2].forEach((r) => { c.beginPath(); c.arc(rx - 8 * s, wy, r * s, -Math.PI * 0.76, -Math.PI * 0.24); c.stroke(); });
+  c.fillStyle = ink; c.beginPath(); c.moveTo(rx - 8 * s, wy + 0.5 * s); c.arc(rx - 8 * s, wy, 3.6 * s, -Math.PI * 0.76, -Math.PI * 0.24); c.closePath(); c.fill();
+  rx -= 25 * s;
+  // signal
+  [4, 6.5, 9, 11.5].forEach((bh, k) => { rrect(c, rx - 18 * s + k * 4.8 * s, cy + 5.5 * s - bh * s, 3.2 * s, bh * s, 1 * s); c.fill(); });
+  c.restore();
+}
+function metal(ctx, x0, x1, base) {
+  // brushed titanium across the band: bright chamfers, darker flats
+  const g = ctx.createLinearGradient(x0, 0, x1, 0);
+  g.addColorStop(0, base[0]); g.addColorStop(0.04, base[2]); g.addColorStop(0.1, base[1]); g.addColorStop(0.5, base[0]);
+  g.addColorStop(0.9, base[1]); g.addColorStop(0.96, base[2]); g.addColorStop(1, base[0]);
+  return g;
+}
+const TI = ['#2b2c30', '#3d3e43', '#8c8d93'];   // black titanium: flat, mid, chamfer highlight
+function drawPhone(ctx, uf, t, box) {
+  const { x, y, w, h } = box, B = PB(), F = B * 0.34;          // F = metal band, the rest is black border
+  const sx = x + B, sy = y + B, sw = w - 2 * B, sh = h - 2 * B;
+  const SR = sw * 0.14, R = SR + B;
+  // shadow
+  ctx.save(); ctx.shadowColor = 'rgba(0,0,0,0.8)'; ctx.shadowBlur = 110; ctx.shadowOffsetY = 50;
+  ctx.fillStyle = '#0a0a0c'; rrect(ctx, x, y, w, h, R); ctx.fill(); ctx.restore();
+  // buttons (behind the band): action + volume on the left, side button on the right
+  const btn = (bx, by, bw, bh) => { ctx.fillStyle = metal(ctx, bx, bx + bw, TI); rrect(ctx, bx, by, bw, bh, bw * 0.45); ctx.fill(); };
+  const bt = B * 0.32;
+  btn(x - bt, y + h * 0.15, bt + 4, h * 0.042);
+  btn(x - bt, y + h * 0.225, bt + 4, h * 0.075);
+  btn(x - bt, y + h * 0.315, bt + 4, h * 0.075);
+  btn(x + w - 4, y + h * 0.245, bt + 4, h * 0.11);
+  // titanium band
+  ctx.fillStyle = metal(ctx, x, x + w, TI); rrect(ctx, x, y, w, h, R); ctx.fill();
+  const v = ctx.createLinearGradient(0, y, 0, y + h);
+  v.addColorStop(0, 'rgba(255,255,255,0.18)'); v.addColorStop(0.12, 'rgba(255,255,255,0)'); v.addColorStop(0.88, 'rgba(0,0,0,0)'); v.addColorStop(1, 'rgba(0,0,0,0.35)');
+  ctx.fillStyle = v; rrect(ctx, x, y, w, h, R); ctx.fill();
+  // outer chamfer catches the light
+  ctx.lineWidth = 1.6; ctx.strokeStyle = 'rgba(255,255,255,0.38)'; rrect(ctx, x + 0.8, y + 0.8, w - 1.6, h - 1.6, R - 0.8); ctx.stroke();
+  // antenna lines
+  ctx.fillStyle = 'rgba(12,12,14,0.85)';
+  [[x + R * 0.55, y, 3, F + 1], [x + w - R * 0.55 - 3, y, 3, F + 1], [x + R * 0.55, y + h - F - 1, 3, F + 1], [x + w - R * 0.55 - 3, y + h - F - 1, 3, F + 1],
+    [x, y + h * 0.085, F + 1, 3], [x + w - F - 1, y + h * 0.085, F + 1, 3]].forEach(([ax, ay, aw, ah]) => ctx.fillRect(ax, ay, aw, ah));
+  // inner chamfer, then the black glass border
+  ctx.strokeStyle = 'rgba(255,255,255,0.22)'; ctx.lineWidth = 1.2; rrect(ctx, x + F, y + F, w - 2 * F, h - 2 * F, R - F); ctx.stroke();
+  ctx.fillStyle = '#030304'; rrect(ctx, x + F + 0.8, y + F + 0.8, w - 2 * F - 1.6, h - 2 * F - 1.6, R - F); ctx.fill();
+  // screen
+  ctx.save(); rrect(ctx, sx, sy, sw, sh, SR); ctx.clip();
+  screenAt(ctx, sx, sy, sw, sh, uf);
+  // Dynamic Island
+  const iw = sw * 0.315, ih = sh * 0.04, ix = sx + (sw - iw) / 2, iy = sy + sh * 0.0135;
+  ctx.fillStyle = '#000'; rrect(ctx, ix, iy, iw, ih, ih / 2); ctx.fill();
+  const lx = ix + iw - ih * 0.62, ly = iy + ih / 2;
+  const lg = ctx.createRadialGradient(lx - ih * 0.06, ly - ih * 0.06, 0, lx, ly, ih * 0.24);
+  lg.addColorStop(0, '#2a3347'); lg.addColorStop(0.5, '#0c0f16'); lg.addColorStop(1, '#000');
+  ctx.fillStyle = lg; ctx.beginPath(); ctx.arc(lx, ly, ih * 0.24, 0, 7); ctx.fill();
+  // glass: one soft diagonal reflection
+  const gl = ctx.createLinearGradient(sx, sy, sx + sw * 0.9, sy + sh * 0.6);
+  gl.addColorStop(0, 'rgba(255,255,255,0.07)'); gl.addColorStop(0.32, 'rgba(255,255,255,0.025)'); gl.addColorStop(0.33, 'rgba(255,255,255,0)'); gl.addColorStop(1, 'rgba(255,255,255,0)');
+  ctx.fillStyle = gl; ctx.fillRect(sx, sy, sw, sh);
+  ctx.restore();
+  // warm rim light from the scene on the right edge
+  const rim = ctx.createLinearGradient(0, y, 0, y + h);
+  rim.addColorStop(0.2, 'rgba(255,178,36,0)'); rim.addColorStop(0.5, 'rgba(255,178,36,0.35)'); rim.addColorStop(0.8, 'rgba(255,178,36,0)');
+  ctx.strokeStyle = rim; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(x + w - 1, y + R); ctx.lineTo(x + w - 1, y + h - R); ctx.stroke();
+}
+function stepRail(ctx, uf) {
+  const cur = uf < 14.25 ? 0 : uf < 17.5 ? 1 : 2;
+  const fin = uf > 19.6;
+  if (P) {
+    // portrait: the current step only, above the phone
+    const s = FORMAT.safe;
+    STEPS.forEach(([label, sub, b], i) => {
+      const a = E.outCubic(prog(uf, b, b + 0.5)) * (i < 2 ? 1 - prog(uf, STEPS[i + 1][2] - 0.25, STEPS[i + 1][2]) : 1);
+      if (a <= 0) return;
+      ctx.save(); ctx.globalAlpha = a; ctx.translate(0, (1 - a) * 30);
+      text(ctx, `STEP ${i + 1} OF 3`, W / 2, s.y + 20, font(30, 500, 'UI'), C.acc, 'center', 3);
+      text(ctx, label, W / 2, s.y + 118, font(84, 800, 'Display'), C.ink, 'center', -2);
+      text(ctx, sub, W / 2, s.y + 178, font(32, 500, 'UI'), C.mut, 'center');
+      ctx.restore();
+    });
+    return;
+  }
+  const x = FORMAT.safe.x, y0 = 300;
+  const ia = E.outCubic(prog(uf, 12.6, 13.2));
+  ctx.save(); ctx.globalAlpha = ia;
+  text(ctx, 'IN TELEGRAM  ·  ON TON', x, y0 - 130, font(30, 500, 'UI'), C.acc, 'left', 3);
+  text(ctx, 'Join in three taps.', x, y0 - 50, font(80, 800, 'Display'), C.ink, 'left', -2);
+  ctx.restore();
+  const gap = 170;
+  STEPS.forEach(([label, sub, b], i) => {
+    const y = y0 + 90 + i * gap, cy = y - 18;
+    const on = i === cur, done = i < cur || (i === 2 && fin);
+    const a = E.outCubic(prog(uf, 12.7 + i * 0.25, 13.3 + i * 0.25));
+    if (a <= 0) return;
+    ctx.save(); ctx.globalAlpha = a * (on || done ? 1 : 0.38); ctx.translate((1 - a) * -30, 0);
+    // rail between circles
+    if (i < 2) {
+      ctx.fillStyle = 'rgba(255,255,255,0.12)'; ctx.fillRect(x + 34, cy + 40, 4, gap - 80);
+      const f = clamp(prog(uf, STEPS[i + 1][2] - 0.6, STEPS[i + 1][2]));
+      ctx.fillStyle = C.acc; ctx.fillRect(x + 34, cy + 40, 4, (gap - 80) * f);
+    }
+    ctx.beginPath(); ctx.arc(x + 36, cy, 36, 0, 7);
+    if (on || done) { ctx.fillStyle = C.acc; ctx.fill(); } else { ctx.strokeStyle = 'rgba(255,255,255,0.4)'; ctx.lineWidth = 2.5; ctx.stroke(); }
+    if (done) { ctx.strokeStyle = C.accInk; ctx.lineWidth = 6; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.beginPath(); ctx.moveTo(x + 22, cy + 1); ctx.lineTo(x + 32, cy + 12); ctx.lineTo(x + 51, cy - 10); ctx.stroke(); }
+    else text(ctx, String(i + 1), x + 36, cy + 12, font(34, 600, 'UI'), on ? C.accInk : C.ink, 'center');
+    text(ctx, label, x + 100, y, font(54, 700, 'Display'), C.ink, 'left', -1);
+    text(ctx, sub, x + 102, y + 48, font(28, 500, 'UI'), on ? C.acc : C.mut, 'left');
+    ctx.restore();
+  });
+}
+function sceneApp2(ctx, uf, t) {
+  bg(ctx, P ? 0.5 : 0.7, P ? 0.6 : 0.5, 0.13);
+  ctx.save(); ctx.fillStyle = C.ink;
+  const r = mulberry32(17);
+  for (let i = 0; i < 120; i++) { const x = r() * W, y = r() * H, sz = 1 + r() * 2.2; ctx.globalAlpha = 0.1 + 0.12 * r(); ctx.beginPath(); ctx.arc(x + Math.sin(t * 0.25 + i) * 8, y + Math.cos(t * 0.2 + i) * 6, sz, 0, 7); ctx.fill(); }
+  ctx.restore();
+  const exit = E.inOutCubic(prog(uf, 21.15, 21.75));
+  ctx.save(); ctx.globalAlpha = 1 - exit;
+  stepRail(ctx, uf);
+  // camera on the phone: rises in, floats, pushes in on each number that matters
+  const box = phoneBox();
+  const rise = E.outCubic(prog(uf, 12.2, 12.95));
+  const [z, fx, fy] = springKeys(uf, [[12, [1, 0.5, 0.5]], [14.4, [1.42, 0.5, 0.3]], [15.0, [1.2, 0.5, 0.92]], [15.9, [1, 0.5, 0.5]],
+    [16.65, [1.5, 0.5, 0.33]], [17.3, [1, 0.5, 0.5]], [19.65, [1.5, 0.5, 0.34]], [20.6, [1, 0.5, 0.5]]], SPRING.gentle);
+  const zx = box.x + box.w * fx, zy = box.y + box.h * fy;
+  // portrait: the phone is already large, so push in less and never let it rise into the step title
+  const zz = P ? 1 + (z - 1) * 0.35 : z;
+  const keep = P ? Math.max(0, 470 - (zy - (zy - box.y) * zz)) : 0;
+  ctx.translate(0, (1 - rise) * H * 0.7 + Math.sin(t * 1.3) * 6 + exit * 60 + keep);
+  M.zoomAbout(ctx, zz * (1 - 0.08 * exit), zx, zy);
+  drawPhone(ctx, uf, t, box);
+  ctx.restore();
+}
+
 // ---------------------------------------------------------------- S4 launch figures
 function tile(ctx, x, y, w, h, u, u0, k, v, sub, bar, vs) {
   const s = springU(u, u0, SPRING.snappy);
@@ -308,7 +557,7 @@ function sceneFigures(ctx, u, t) {
   const roll = E.outCubic(prog(u, 14, 15.2));
   const raised = 18_412_640 * (0.55 + 0.45 * roll) + Math.floor(prog(u, 15.2, 16) * 4) * 250;
   // the countdown ticks with the film's clock: 50d 02h 33m, seconds running down
-  const secs = 50 * 86400 + 2 * 3600 + 33 * 60 + 20 - Math.floor(t - M.TS(UNWARP(14)));
+  const secs = 50 * 86400 + 2 * 3600 + 33 * 60 + 20 - Math.floor(M.TS(RNOW) - M.TS(FAST(UNWARP(14))));
   const d = Math.floor(secs / 86400), hh = Math.floor((secs % 86400) / 3600), mm = Math.floor((secs % 3600) / 60), ss = secs % 60;
   const p2 = (n) => String(n).padStart(2, '0');
   const tiles = [
@@ -399,7 +648,7 @@ function endCard(ctx, u, t) {
 // ---------------------------------------------------------------- pacing
 // The film runs 15 s / 30 beats. Scenes are written on a 20-beat plan; WARP maps a film beat to
 // that plan, piecewise-linear, so every shot holds longer and the app's receipts stay readable.
-const KNOTS = [[0, 0], [6, 4], [12, 8], [13.5, 9], [15, 10.5], [15.5, 11], [17.5, 12], [18.5, 12.5], [19.5, 13], [20.25, 13.5],
+const KNOTS = [[0, 0], [5, 4], [12.5, 8],
   [21.6, 13.6], [21.75, 13.75], [23.25, 14.5], [24.4, 15.4], [25, 16], [26.5, 17.5], [30, 20]];
 function pw(x, a, b) {
   if (x <= KNOTS[0][a]) return KNOTS[0][b] + (x - KNOTS[0][a]);
@@ -412,29 +661,51 @@ function pw(x, a, b) {
 const WARP = (u) => pw(u, 0, 1);      // film beat -> plan beat
 const UNWARP = (v) => pw(v, 1, 0);    // plan beat -> film beat
 
+// Real beats on the 120 bpm grid -> film beats (uf). The film's motion is written in film beats, so a long
+// span of real beats over a short span of film beats is a hold: each Mini App screen gets time to be read,
+// while taps and transitions keep their pace. Mirrored in audio/score.py (HOLDS).
+const HOLDS = [[0, 0], [6, 2.9], [10, 3.75], [12, 5],               // opening: headline holds ~2 s, then the dive
+  [19.5, 12.5],                                                    // machines, as approved
+  [20.5, 12.95], [23.5, 13.05], [24.7, 13.6], [26, 14.25],          // phone lands · chat held · tap · Mini App slides up
+  [30, 14.8], [31.4, 15.4], [34.8, 15.65], [36.2, 16.25],           // Buy held · tap Pay · Confirm held · tap Approve
+  [38, 16.55], [38.6, 16.75], [42, 17.05], [43.4, 17.7],            // Settling held · receipt held · tap Claim now
+  [45.8, 17.8], [47.2, 18.45], [49.6, 18.55], [51, 19.15],          // Claim held · tap · Confirm claim held · tap
+  [52.6, 19.45], [53.2, 19.7], [57.2, 21.15], [58.5, 21.75],        // Claiming held · claimed held · phone leaves
+  [61.5, 23.25], [64.5, 24.4], [65.5, 25],                       // figures: tiles in at half speed, all four held
+  [70.5, 30]];
+const SLOW = (r) => { const K = HOLDS; if (r <= 0) return r;
+  for (let i = 1; i < K.length; i++) if (r <= K[i][0]) return K[i - 1][1] + (r - K[i - 1][0]) / (K[i][0] - K[i - 1][0]) * (K[i][1] - K[i - 1][1]);
+  const L = K[K.length - 1]; return L[1] + (r - L[0]); };
+const FAST = (f) => { const K = HOLDS; if (f <= 0) return f;
+  for (let i = 1; i < K.length; i++) if (f <= K[i][1]) return K[i - 1][0] + (f - K[i - 1][1]) / (K[i][1] - K[i - 1][1]) * (K[i][0] - K[i - 1][0]);
+  const L = K[K.length - 1]; return L[0] + (f - L[1]); };
+let RNOW = 0;   // the real beat being drawn (taps are timed in real beats so they never crawl through a hold)
+
 // ---------------------------------------------------------------- film
 M.film({
   fonts: [font(100, 800, 'Display'), font(100, 700, 'Display'), font(100, 600, 'Display'), font(40, 500, 'UI')],
   images: IMAGES,
-  hits: HITS.map(([b, ...r]) => [Math.round(UNWARP(b) * 1000) / 1000, ...r]),
+  hits: HITS.map(([b, l, f, o = {}]) => { const { film, ...rest } = o; return [Math.round(FAST(film ? b : UNWARP(b)) * 1000) / 1000, l, f, rest]; }),
   // motion blur sub-frames: more on whips, fewer where 3-D is expensive
-  samples: (t) => { const u = WARP(M.U(t)); return u > 13.9 && u < 15.5 ? 1 : (u > 5.2 && u < 5.8) || (u > 6.7 && u < 7.3) || (u > 7.7 && u < 8.1) ? 8 : u < 4 || (u > 7.9 && u < 14.4) ? 3 : 4; },
+  samples: (t) => { const u = WARP(SLOW(M.U(t))); return u > 13.9 && u < 15.5 ? 1 : (u > 5.2 && u < 5.8) || (u > 6.7 && u < 7.3) || (u > 7.7 && u < 8.1) ? 8 : u < 4 || (u > 7.9 && u < 14.4) ? 3 : 4; },
   async init(ctx, images) {
     IMG = images;
     await G.initGL({ exposure: 1.0 });
     LAT = latticeSet(); PHONE = phoneSet();
     const tp = await fetch('assets/miniapp/taps.json').then((r) => r.json());
+    const t3 = await fetch('assets/miniapp4/taps.json').then((r) => r.json()), tc = await fetch('assets/chat/taps.json').then((r) => r.json());
+    TAPS2 = [[13.5, tc.open.x, tc.open.y, true], [15.25, t3.pay.x, t3.pay.y], [16.1, t3.approvePay.x, t3.approvePay.y], [17.5, t3.claimNow.x, t3.claimNow.y], [18.25, t3.claim.x, t3.claim.y], [19, t3.approveClaim.x, t3.approveClaim.y]];
     TAPS = [[9, tp.pay.x, tp.pay.y], [10.5, tp.approvePay.x, tp.approvePay.y], [12, tp.claimNow.x, tp.claimNow.y], [12.5, tp.claim.x, tp.claim.y], [13, tp.approveClaim.x, tp.approveClaim.y]];
   },
-  draw(ctx, uf, t) {
-    const u = WARP(uf);
+  draw(ctx, r, rt) {
+    RNOW = r;
+    const uf = SLOW(r), t = M.TS(uf), u = WARP(uf);
     if (u < 4) sceneLattice(ctx, u, t);
-    else if (u < 8) sceneMachines(ctx, u);
-    else if (u < 13.85) sceneApp(ctx, u, t);
+    else if (uf < 12.5) sceneMachines(ctx, u);
+    else if (uf < 21.75) sceneApp2(ctx, uf, t);
     else if (u < 16) { sceneFigures(ctx, u, t); if (u > 15.5) mark(ctx, W / 2, H * (P ? 0.36 : 0.32), FORMAT.pick({ '16x9': 150, '9x16': 190 }), u); }
     else endCard(ctx, u, t);
     // 14.0-14.35: the phone pulls away while the figures arrive
-    if (u >= 13.85 && u < 14.05) G.renderSet(ctx, PHONE, t, u, { alpha: 1 - E.outCubic(prog(u, 13.85, 14.05)) });
   },
   post(ctx, u, t) { grain(ctx, t, 0.035, 0.32); },
 });

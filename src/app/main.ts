@@ -70,6 +70,9 @@ if (inTelegram) {
   } catch { /* ignore */ }
 }
 document.documentElement.classList.toggle('in-tg', inTelegram);
+// ?present=1: presentation mode for the launch ad. Hides the demo/testnet switch and the demo-only notes.
+const PRESENT = new URLSearchParams(location.search).has('present');
+document.documentElement.classList.toggle('present', PRESENT);
 
 /* ───────────── storage (demo only) ───────────── */
 const KEY = 'kelvara-demo-v1';
@@ -246,7 +249,7 @@ function demoApprove(kind: Kind, amount: number): Promise<boolean> {
   return new Promise((resolve) => {
     openOverlay(`
       <div class="grab"></div>
-      <p class="sheet-k">Demo wallet · approve request</p>
+      <p class="sheet-k">${PRESENT ? 'Confirm in your wallet' : 'Demo wallet · approve request'}</p>
       <h3>${kind === 'faucet' ? 'Get test USDT' : kind === 'pay' ? 'Confirm payment' : 'Claim KVRA'}</h3>
       <ul class="kv">${lines[kind]}<li><span>Network fee</span><b>${kind === 'pay' ? '0.11' : '0.03'} TON <em>simulated</em></b></li></ul>
       <p class="sheet-note">This is the demo. No wallet is connected and nothing is sent.</p>
@@ -290,7 +293,7 @@ function receipt(kind: Kind, amount: number) {
   openOverlay(`
     <div class="rcpt">
       <div class="tickmark"><svg viewBox="0 0 52 52"><circle cx="26" cy="26" r="24"/><path d="M15 27l7 7 15-16"/></svg></div>
-      <p class="sheet-k">${S.mode === 'demo' ? 'Demo receipt' : 'Testnet receipt'}</p>
+      <p class="sheet-k">${PRESENT ? 'Receipt' : S.mode === 'demo' ? 'Demo receipt' : 'Testnet receipt'}</p>
       <h3>${title}</h3>
       <ul class="kv">
         ${kind === 'pay' ? `<li><span>Paid</span><b>${fmt(amount, 2)} tUSDT</b></li><li><span>Price</span><b>${PRICE} tUSDT / KVRA</b></li>` : ''}
